@@ -3,30 +3,77 @@ header {
     height: 70px;
 }
 header img { /*задаем размер картинки*/
-    width: 70px;
+    width: 80px;
     height: 50px;
     cursor: pointer;
     margin: 10px;
     /*Нужно добавить сдвиг слева и сверху*/
 }
-.content{
-  background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
-  background-repeat: no-repeat; /* Отключает повторение изображения */
-  background-position: center;  /* Выравнивает изображение по центру */
-  background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
-}
-
-.header-text{
-    font-family: IBM Plex Mono;
-    font-size: 12px;
-}
-
+/*---------------body----------------------*/
 body {
     background-image: url('../img/background_index.png'); /* Путь к изображению */
     background-repeat: no-repeat; /* Отключает повторение изображения */
     background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
     margin: 0;
     padding: 0;
+}
+
+.header-text{
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    margin-left: 30px;
+}
+
+/*------searching---------*/
+.search-field {
+    display: flex;
+    max-width: 700px;
+    margin: 20px 40px;
+    font-family: IBM Plex Mono;
+}
+
+.search-field input[type="text"] {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e1e5eb;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    outline: none;
+    font-size: 18px;
+    font-family: IBM Plex Mono;
+    transition: border-color 0.3s ease;
+}
+
+.search-field input[type="text"]:focus {
+    border-color: #000000;
+}
+
+.search-field input[type="text"]::placeholder {
+    color: #a0aec0;
+}
+
+.search-field button {
+    padding: 12px 24px;
+    border: 2px solid #000000;
+    border-radius: 0 10px 10px 0;
+    background-color:rgba(52, 58, 63, 1);
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-field button:hover {
+    background: #000000;
+    border-color: #000000;
+}
+/*------content----------*/
+.content{
+  background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
+  background-repeat: no-repeat; /* Отключает повторение изображения */
+  background-position: center;  /* Выравнивает изображение по центру */
+  background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
 }
 
 .container {
@@ -37,18 +84,25 @@ body {
     margin: 20px auto;
     max-width: 1200px;
 }
-
+/*-------------Cards--------------*/
 .card {
-    background-color: #f7f7f7;
+    background-color: #ffffff;
     border: 1px solid #ccc;
     border-radius: 10px;
     width: 530px;
-    height: 150px;
+    height: 220px;
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* текст сверху, кнопка снизу */
     padding: 20px;
     box-sizing: border-box;
+}
+
+.card-content{
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex: 1;
 }
 
 .card-title {
@@ -57,9 +111,43 @@ body {
     font-weight: 600;
     margin: 0;
     color: #000;
+    word-wrap: break-word; /* Перенос длинных слов */
 }
 
-.card-button {
+.card-descr {
+    font-weight: 100;
+    word-wrap: break-word; /* Перенос длинных слов */
+    overflow-wrap: break-word; /* Альтернативное свойство для переноса */
+    hyphens: auto; /* Автоматическое добавление переносов (поддерживается не всеми браузерами) */
+}
+
+.card-text {
+    flex: 1;
+    min-width: 0; /* Важно для правильного переноса текста */
+    width: 300px;
+}
+
+.card-image {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: right;
+}
+
+.card-image img {
+    width: 180px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/*--------buttons----------*/
+.card-buttons {
+    
+}
+
+.card-button-add {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
     color: #fff;
@@ -67,59 +155,61 @@ body {
     background-color:rgba(52, 58, 63, 1);
     padding: 12px 24px;
     width: 199.83px;
-    height: 45px;
+    height: 24px;
     border-radius: 0px;
     text-align: center;
     display: inline-block;
     width: fit-content;
-    margin-top: auto;
     text-decoration: none;
-    
     /* Плавные переходы */
     transition: all 0.3s ease;
-    
     /* Дополнительные стили для лучшего вида */
     border: none;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    /*align-self: flex-start;*/
+    /*margin-top: auto;*/
 }
 
-/* Hover-эффекты */
-.card-button:hover {
-    background-color: #cc0000; /* темнее красный */
+.card-button-more {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #a0a0a0;
+    font-weight: 500;
+    background-color:rgb(255, 255, 255);
+    padding: 12px 24px;
+    width: 199.83px;
+    height: 24px;
+    border-radius: 0px;
+    text-align: center;
+    display: inline-block;
+    width: fit-content;
+    transition: all 0.3s ease;
+    font-style: normal;
+}
+
+/*-------------Effects--------------*/
+.card-button-add:hover {
+    background-color: #000000; /* темнее красный */
     transform: translateY(-2px); /* легкий подъем */
     box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* тень больше */
 }
 
 /* Active-эффект при нажатии */
-.card-button:active {
+.card-button-add:active {
     transform: translateY(0); /* возврат на место */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* тень меньше */
 }
 
 /* Фокус для accessibility */
-.card-button:focus {
-    outline: 2px solid #ff4444;
+.card-button-add:focus {
+    outline: 2px solid #000000;
     outline-offset: 2px;
 }
 
-h1 {
-    color: #333;
-    font-size: 24px;
-}
-
-ul li a {
-    text-decoration: none;
-    color: #333;
-    font-size: 18px;
-}
-
-ul li a:hover {
+.card-button-more:hover {
     text-decoration: underline;
-}
-
-h2 {
-    color: #333;
-    font-size: 18px;
-    margin-top: 20px;
+    transition: all 0.3s ease;
+    color:rgb(9, 9, 9);
 }

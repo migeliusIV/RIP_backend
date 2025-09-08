@@ -18,7 +18,7 @@
         -->
 
         <form action="/IBM" method="GET" class="search-field">
-            <input type="text" name="query" placeholder="Введите запрос" value="{{ .query }}">
+            <input type="text" name="query" placeholder="Введите название гейта" value="{{ .query }}">
             <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать
             введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
             <button type="submit">Найти</button>
@@ -27,10 +27,17 @@
         <div class="container">
             {{ range .gates }}
             <div class="card">
-                <p class="card-title">{{ .Title }}</p>
-                <img src="/static/img/image.png" alt="home" width="50px" height="50px">
-                <p class="card-descr">{{ .Description }}</p>
-                <a class="card-button" href="/gate_property/{{ .ID }}">Подробнее</a>
+                <div class="card-content">
+                    <div class="card-text">
+                        <p class="card-title">{{ .Title }}</p>
+                        <p class="card-descr">{{ .Description }}</p>
+                    </div>
+                    <div class="card-image"><img src="/static/img/image.png" alt="home" width="50px" height="50px"></div>
+                </div>
+                <div class="buttons">
+                    <a class="card-button-add" href="/gate_property/{{ .ID }}">Подробнее</a>
+                    <a class="card-button-more" href="/gate_property/{{ .ID }}">Подробнее</a>
+                </div>
             </div>
             {{ end }}
         </div>
