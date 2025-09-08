@@ -24,18 +24,38 @@
             <button type="submit">Найти</button>
         </form>
 
+        <div>
+            <a class="order-button" href="/gate_property/1">Составление задачи (кнопка корзины)</a>
+        </div>
+
         <div class="container">
             {{ range .gates }}
             <div class="card">
                 <div class="card-content">
                     <div class="card-text">
+
+                        {{ if .IsEditable }}
+                        <div class="attributes">
+                            <div class="attribute-editable">
+                                <p>Требуется ввод данных</p>
+                            </div>
+                            <div class="attribute-axis">
+                                <p>Изменение по оси {{ .TheAxis }}</p>
+                            </div>
+                        </div>
+                        {{ else }}
+                        <div class="attribute-not-editable">
+                            <p>Не требуется ввод данных</p>
+                        </div>
+                        {{ end }}
+
                         <p class="card-title">{{ .Title }}</p>
                         <p class="card-descr">{{ .Description }}</p>
                     </div>
-                    <div class="card-image"><img src="/static/img/image.png" alt="home" width="50px" height="50px"></div>
+                    <div class="card-image"><img src="/static/img/{{ .Image }}" alt="home"></div>
                 </div>
                 <div class="buttons">
-                    <a class="card-button-add" href="/gate_property/{{ .ID }}">Подробнее</a>
+                    <a class="card-button-add" href="/gate_property/{{ .ID }}">Добавить</a>
                     <a class="card-button-more" href="/gate_property/{{ .ID }}">Подробнее</a>
                 </div>
             </div>

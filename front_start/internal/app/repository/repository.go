@@ -16,6 +16,10 @@ type Gate struct {
 	ID          int
 	Title       string
 	Description string
+	FullInfo    string
+	Image       string
+	IsEditable  bool
+	TheAxis     string
 }
 
 func (r *Repository) GetGates() ([]Gate, error) {
@@ -24,17 +28,56 @@ func (r *Repository) GetGates() ([]Gate, error) {
 		{
 			ID:          1,
 			Title:       "Identity Gate",
-			Description: "Ничего не делает с состоянием кубита. Оставляет его без изменений.",
+			Description: "Не изменяет состояния кубита.",
+			FullInfo:    "\tНичего не делает с состоянием кубита. Оставляет его без изменений.",
+			Image:       "I-gate.png",
+			IsEditable:  false,
+			TheAxis:     "",
 		},
 		{
 			ID:          2,
 			Title:       "Pauli-X Gate (NOT gate)",
 			Description: "Инвертирует состояние кубита.",
+			FullInfo:    "\tАналог классического NOT-гейта. Переворачивает состояние кубита.",
+			Image:       "X-gate.png",
+			IsEditable:  false,
+			TheAxis:     "",
 		},
 		{
 			ID:          3,
 			Title:       "X-axis Rotation Gate",
 			Description: "Вращает кубит вокруг оси X на угол тэта.",
+			FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси X.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
+			Image:       "X-rot-gate.png",
+			IsEditable:  true,
+			TheAxis:     "X",
+		},
+		{
+			ID:          4,
+			Title:       "Y-axis Rotation Gate",
+			Description: "Вращает кубит вокруг оси Y на угол тэта.",
+			FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси Y.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
+			Image:       "Y-rot-gate.png",
+			IsEditable:  true,
+			TheAxis:     "Y",
+		},
+		{
+			ID:          5,
+			Title:       "Z-axis Rotation Gate",
+			Description: "Вращает кубит вокруг оси Z на угол тэта.",
+			FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси Z.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
+			Image:       "Z-rot-gate.png",
+			IsEditable:  true,
+			TheAxis:     "Z",
+		},
+		{
+			ID:          6,
+			Title:       "H (Hadamard) Gate",
+			Description: "Создает равномерную суперпозицию из базисного состояния.",
+			FullInfo:    "\tОперация поворачивает кубит на 90 градусов вокруг оси Y, затем на 180 градусов вокруг оси X.\n\tЭто один из самых важных гейтов.",
+			Image:       "H-gate.png",
+			IsEditable:  false,
+			TheAxis:     "",
 		},
 	}
 	// обязательно проверяем ошибки, и если они появились - передаем выше, то есть хендлеру
