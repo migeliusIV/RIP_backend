@@ -1,33 +1,3 @@
-header {
-    background: rgb(255, 255, 255);
-    height: 90px;
-}
-header img { /*задаем размер картинки*/
-    width: 70px;
-    height: 50px;
-    cursor: pointer;
-    margin: 10px;
-    /*Нужно добавить сдвиг слева и сверху*/
-}
-.content{
-  background-image: url('resources/img/background_index.png'); /* Путь к изображению */
-  background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
-  background-repeat: no-repeat; /* Отключает повторение изображения */
-  background-position: center;  /* Выравнивает изображение по центру */
-  background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
-}
-
-.header-text{
-    font-family: IBM Plex Mono;
-    font-size: 12px;
-}
-
-body {
-    background: rgba(244, 244, 244, 1);
-    margin: 0;
-    padding: 0;
-}
-
 .container {
     display: flex;
     flex-wrap: wrap;
@@ -58,16 +28,14 @@ body {
     color: #000;
 }
 
-.card-button {
+.card-main-button {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
     color: #fff;
     font-weight: 500;
     background-color:rgba(52, 58, 63, 1);
     padding: 12px 24px;
-    width: 199.83px;
-    height: 45px;
-    border-radius: 0px;
+    border-radius: 6px;
     text-align: center;
     display: inline-block;
     width: fit-content;
@@ -84,41 +52,20 @@ body {
 }
 
 /* Hover-эффекты */
-.card-button:hover {
+.card-main-button:hover {
     background-color: #cc0000; /* темнее красный */
     transform: translateY(-2px); /* легкий подъем */
     box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* тень больше */
 }
 
 /* Active-эффект при нажатии */
-.card-button:active {
+.card-main-button:active {
     transform: translateY(0); /* возврат на место */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* тень меньше */
 }
 
 /* Фокус для accessibility */
-.card-button:focus {
+.card-main-button:focus {
     outline: 2px solid #ff4444;
     outline-offset: 2px;
-}
-
-h1 {
-    color: #333;
-    font-size: 24px;
-}
-
-ul li a {
-    text-decoration: none;
-    color: #333;
-    font-size: 18px;
-}
-
-ul li a:hover {
-    text-decoration: underline;
-}
-
-h2 {
-    color: #333;
-    font-size: 18px;
-    margin-top: 20px;
 }

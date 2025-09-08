@@ -12,61 +12,65 @@ func NewRepository() (*Repository, error) {
 	return &Repository{}, nil
 }
 
-type Order struct { // вот наша новая структура
-	ID    int    // поля структур, которые передаются в шаблон
-	Title string // ОБЯЗАТЕЛЬНО должны быть написаны с заглавной буквы (то есть публичными)
+type Gate struct {
+	ID          int
+	Title       string
+	Description string
 }
 
-func (r *Repository) GetOrders() ([]Order, error) {
+func (r *Repository) GetGates() ([]Gate, error) {
 	// имитируем работу с БД. Типа мы выполнили sql запрос и получили эти строки из БД
-	orders := []Order{ // массив элементов из наших структур
+	gates := []Gate{ // массив элементов из наших структур
 		{
-			ID:    1,
-			Title: "first order",
+			ID:          1,
+			Title:       "Identity Gate",
+			Description: "Ничего не делает с состоянием кубита. Оставляет его без изменений.",
 		},
 		{
-			ID:    2,
-			Title: "second order",
+			ID:          2,
+			Title:       "Pauli-X Gate (NOT gate)",
+			Description: "Инвертирует состояние кубита.",
 		},
 		{
-			ID:    3,
-			Title: "third order",
+			ID:          3,
+			Title:       "X-axis Rotation Gate",
+			Description: "Вращает кубит вокруг оси X на угол тэта.",
 		},
 	}
 	// обязательно проверяем ошибки, и если они появились - передаем выше, то есть хендлеру
 	// тут я снова искусственно обработаю "ошибку" чисто чтобы показать вам как их передавать выше
-	if len(orders) == 0 {
+	if len(gates) == 0 {
 		return nil, fmt.Errorf("массив пустой")
 	}
 
-	return orders, nil
+	return gates, nil
 }
 
-func (r *Repository) GetOrder(id int) (Order, error) {
+func (r *Repository) GetGate(id int) (Gate, error) {
 	// тут у вас будет логика получения нужной услуги, тоже наверное через цикл в первой лабе, и через запрос к БД начиная со второй
-	orders, err := r.GetOrders()
+	gates, err := r.GetGates()
 	if err != nil {
-		return Order{}, err // тут у нас уже есть кастомная ошибка из нашего метода, поэтому мы можем просто вернуть ее
+		return Gate{}, err // тут у нас уже есть кастомная ошибка из нашего метода, поэтому мы можем просто вернуть ее
 	}
 
-	for _, order := range orders {
-		if order.ID == id {
-			return order, nil // если нашли, то просто возвращаем найденный заказ (услугу) без ошибок
+	for _, gate := range gates {
+		if gate.ID == id {
+			return gate, nil // если нашли, то просто возвращаем найденный заказ (услугу) без ошибок
 		}
 	}
-	return Order{}, fmt.Errorf("заказ не найден") // тут нужна кастомная ошибка, чтобы понимать на каком этапе возникла ошибка и что произошло
+	return Gate{}, fmt.Errorf("заказ не найден") // тут нужна кастомная ошибка, чтобы понимать на каком этапе возникла ошибка и что произошло
 }
 
-func (r *Repository) GetOrdersByTitle(title string) ([]Order, error) {
-	orders, err := r.GetOrders()
+func (r *Repository) GetGatesByTitle(title string) ([]Gate, error) {
+	gates, err := r.GetGates()
 	if err != nil {
-		return []Order{}, err
+		return []Gate{}, err
 	}
 
-	var result []Order
-	for _, order := range orders {
-		if strings.Contains(strings.ToLower(order.Title), strings.ToLower(title)) {
-			result = append(result, order)
+	var result []Gate
+	for _, gate := range gates {
+		if strings.Contains(strings.ToLower(gate.Title), strings.ToLower(title)) {
+			result = append(result, gate)
 		}
 	}
 
