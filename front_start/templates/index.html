@@ -6,7 +6,7 @@
 <body>
     <header>
         <h1>
-            <a href="/IBM"><img src="/resources/img/image.png" alt="home"></a>
+            <a href="/IBM"><img src="/static/img/image.png" alt="home"></a>
         </h1>
     </header>
     <div class="content">
@@ -28,7 +28,7 @@
             {{ range .gates }}
             <div class="card">
                 <p class="card-title">{{ .Title }}</p>
-                <img src="/resources/img/image.png" alt="home" width="50px" height="50px">
+                <img src="/static/img/image.png" alt="home" width="50px" height="50px">
                 <p class="card-descr">{{ .Description }}</p>
                 <a class="card-button" href="/gate_property/{{ .ID }}">Подробнее</a>
             </div>

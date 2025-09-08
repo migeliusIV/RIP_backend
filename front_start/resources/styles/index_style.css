@@ -1,6 +1,6 @@
 header {
     background: rgb(255, 255, 255);
-    height: 90px;
+    height: 70px;
 }
 header img { /*задаем размер картинки*/
     width: 70px;
@@ -10,7 +10,6 @@ header img { /*задаем размер картинки*/
     /*Нужно добавить сдвиг слева и сверху*/
 }
 .content{
-  background-image: url('resources/img/background_index.png'); /* Путь к изображению */
   background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
   background-repeat: no-repeat; /* Отключает повторение изображения */
   background-position: center;  /* Выравнивает изображение по центру */
@@ -23,7 +22,9 @@ header img { /*задаем размер картинки*/
 }
 
 body {
-    background: rgba(244, 244, 244, 1);
+    background-image: url('../img/background_index.png'); /* Путь к изображению */
+    background-repeat: no-repeat; /* Отключает повторение изображения */
+    background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
     margin: 0;
     padding: 0;
 }
