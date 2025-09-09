@@ -28,6 +28,7 @@ func StartServer() {
 
 	r.GET("/IBM", handler.GetGates)
 	r.GET("/gate_property/:id", handler.GetGate)
+	r.GET("/task/:id", handler.GetTask)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	log.Println("Server down")

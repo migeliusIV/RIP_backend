@@ -1,15 +1,3 @@
-header {
-    background: rgb(255, 255, 255);
-    height: 70px;
-}
-
-header img { /*задаем размер картинки*/
-    width: 80px;
-    height: 50px;
-    cursor: pointer;
-    margin: 10px;
-    /*Нужно добавить сдвиг слева и сверху*/
-}
 /*---------------body----------------------*/
 body {
     background-image: url('../img/background_properties.png'); /* Путь к изображению */

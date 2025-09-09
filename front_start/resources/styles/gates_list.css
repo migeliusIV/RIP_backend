@@ -85,6 +85,42 @@ body {
     margin: 20px auto;
     max-width: 1200px;
 }
+/*--------task|order--------*/
+.task-button {
+    flex: 1;
+    position: fixed;
+    left: 20px;    /* отступ от левого края */
+    bottom: 20px;  /* отступ от нижнего края */
+    z-index: 1000; /* чтобы был поверх других элементов */
+    display: inline-block;
+}
+
+.image-with-text {
+    position: relative;
+    display: inline-block;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 38%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    z-index: 2;
+}
+
+.image-with-text img {
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+.task-button img{
+    width: 90px;
+    height: 90px;
+}
 /*-------------Cards--------------*/
 .card {
     background-color: #ffffff;
@@ -143,6 +179,11 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/*----------main-------*/
+.main-content{
+    display: flex;
+}
+/*--------atributes--------*/
 .attribute-not-editable{
     margin: 0 auto 10px 0;
     font-size: 9px;

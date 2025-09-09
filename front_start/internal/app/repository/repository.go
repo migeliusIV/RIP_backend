@@ -119,3 +119,43 @@ func (r *Repository) GetGatesByTitle(title string) ([]Gate, error) {
 
 	return result, nil
 }
+
+type Task struct {
+	ID_task int
+	Gates   []Gate
+}
+
+func (r *Repository) GetTasks() ([]Task, error) {
+	gates, err := r.GetGates()
+	if err != nil {
+		return nil, err
+	}
+
+	tasks := []Task{
+		{
+			ID_task: 1,
+			Gates: []Gate{
+				gates[0],
+				gates[1],
+				gates[3],
+			},
+		},
+	}
+
+	return tasks, nil
+}
+
+func (r *Repository) GetTask(id int) (Task, error) {
+	tasks, err := r.GetTasks()
+	if err != nil {
+		return Task{}, err
+	}
+
+	for _, task := range tasks {
+		if task.ID_task == id {
+			return task, nil
+		}
+	}
+
+	return Task{}, fmt.Errorf("фактор не найден")
+}

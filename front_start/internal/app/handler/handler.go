@@ -36,7 +36,7 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 		}
 	}
 
-	ctx.HTML(http.StatusOK, "index.html", gin.H{
+	ctx.HTML(http.StatusOK, "gates_list.html", gin.H{
 		"gates": gates,
 		// в ином случае оно будет очищаться при нажатии на кнопку
 	})
@@ -57,5 +57,23 @@ func (h *Handler) GetGate(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "properties.html", gin.H{
 		"gate": gate,
+	})
+}
+
+func (h *Handler) GetTask(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	task, err := h.Repository.GetTask(id)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	ctx.HTML(http.StatusOK, "task.html", gin.H{
+		"task": task,
 	})
 }
