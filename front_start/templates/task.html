@@ -18,29 +18,42 @@
             <div class="task-gates-text">
                 <p>Для этого расположите карточки в необходимом порядке и введите углы для операций вращения.</p>
             </div>
-            <div class="task-gates-cards">
-
-            </div>
+            {{ range .task.Gates }}
+                <div class="task-gates-cards">
+                    <div>
+                        <img src="/static/img/{{ .Image }}" alt="home">
+                    </div>
+                    <div class="task-cards-name">
+                        <p> {{ .Title }} </p>
+                    </div>
+                    {{ if .IsEditable }}
+                        <div>
+                            <input type="text" name="userName" value="" class="card-form"/>
+                        </div>
+                    {{ end }}
+                    <div></div>
+                </div>
+            {{ end }}
         </div>
-        <div class="description">
-            <div class="description-header">
-                <p>Описание</p>
-            </div>
-            <div class="description-text">
-                <p>Добавьте описание задачи, чтобы не перепутать её с другими.</p>
-            </div>
-            <div class="description-field">
-                
-            </div>
+        <div class="result">
+            <div class="result-header">
+                <p>Результат</p>
+            </div> 
+            <div class="result-field">
+                <input type="text" name="userName" value="" class="res-form"/>
+            </div> 
         </div>
     </div>
-    <div class="result">
-        <div class="result-header">
-            <p>Результат</p>
-        </div> 
-        <div class="result-field">
-
-        </div> 
+    <div class="description">
+        <div class="description-header">
+            <p>Описание</p>
+        </div>
+        <div class="description-text">
+            <p>Добавьте описание задачи, чтобы не перепутать её с другими.</p>
+        </div>
+        <div class="description-field">
+            <input type="text" name="userName" value="" class="desc-form"/>
+        </div>
     </div>
 </body>
 </html>
