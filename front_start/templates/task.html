@@ -20,18 +20,19 @@
             </div>
             {{ range .task.Gates }}
                 <div class="task-gates-cards">
-                    <div>
-                        <img src="/static/img/{{ .Image }}" alt="home">
-                    </div>
-                    <div class="task-cards-name">
+                    <img src="/static/img/{{ .Image }}" width="70px" height="50px" alt="theme">
+                    <div class="task-card-name">
                         <p> {{ .Title }} </p>
                     </div>
-                    {{ if .IsEditable }}
-                        <div>
-                            <input type="text" name="userName" value="" class="card-form"/>
-                        </div>
-                    {{ end }}
-                    <div></div>
+                {{ if .IsEditable }}
+                    <div class="task-card-appendix">
+                        <p> θ =</p>
+                        <input type="text" name="userName" value="" class="task-card-form"/>
+                    </div>
+                {{ end }}
+                    <div class="task-card-trash">
+                        <img src="/static/img/trash.png" alt="trash">
+                    </div>
                 </div>
             {{ end }}
         </div>
@@ -52,7 +53,7 @@
             <p>Добавьте описание задачи, чтобы не перепутать её с другими.</p>
         </div>
         <div class="description-field">
-            <input type="text" name="userName" value="" class="desc-form"/>
+            <textarea type="text" name="userName" value="" class="desc-form"></textarea>
         </div>
     </div>
 </body>
