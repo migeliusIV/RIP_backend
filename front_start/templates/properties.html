@@ -2,22 +2,21 @@
 <head>
     <title>IBM quantum gate</title>
     <link rel="stylesheet" href="/static/styles/general.css">
-    <link rel="stylesheet" href="/static/styles/properties_style.css">
 </head>
-<body>
+<body class="prop-body">
     <header>
         <h1>
             <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home" width="50px" height="50px"></a>
         </h1>
     </header>
-    <div class="header-text">Подробнее об однокубитном гейте</div>
+    <div class="prop-s-t">Подробнее об однокубитном гейте</div>
 
-    <div class="container">
-        <div class="card">
-            <div class="card-content">
-                <div class="card-text">
-                    <p class="card-title">{{ .gate.Title }}</p>
-                    <p class="card-descr">{{ .gate.FullInfo }}</p>
+    <div class="prop-templ">
+        <div class="prop-card">
+            <div class="prop-crd-cnt">
+                <div class="prop-crd-text">
+                    <p class="prop-crd-ttl">{{ .gate.Title }}</p>
+                    <p class="prop-crd-dscr">{{ .gate.FullInfo }}</p>
                     {{ if .gate.IsEditable }}
                         <div class="attributes">
                             <div class="attribute-editable">
@@ -28,12 +27,12 @@
                             </div>
                         </div>
                         {{ else }}
-                        <div class="attribute-not-editable">
+                        <div class="attribute-not-editable-alter">
                             <p>Не требуется ввод данных</p>
                         </div>
                         {{ end }}
                 </div>
-                <div class="card-image">
+                <div class="prop-crd-img">
                     <img src={{ .gate.Image }} alt="home">
                 </div>
             </div>
