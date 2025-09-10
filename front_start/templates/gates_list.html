@@ -7,7 +7,7 @@
 <body>
     <header>
         <h1>
-            <a href="/IBM"><img src="/static/img/image.png" alt="home"></a>
+            <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home"></a>
         </h1>
     </header>
     <div class="content">
@@ -28,7 +28,7 @@
             <div class="task-button">
                 <div class="image-with-text">
                     <a href="/task/1">
-                        <img src="/static/img/basket.png" alt="home">
+                        <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">
                     </a>
                     <p class="overlay-text">3</p>
                 </div>
@@ -58,7 +58,7 @@
                             <p class="card-title">{{ .Title }}</p>
                             <p class="card-descr">{{ .Description }}</p>
                         </div>
-                        <div class="card-image"><img src="/static/img/{{ .Image }}" alt="home"></div>
+                        <div class="card-image"><img src={{ .Image }} alt="home"></div>
                     </div>
                     <div class="buttons">
                         <a class="card-button-add" href="/gate_property/{{ .ID }}">Добавить</a>

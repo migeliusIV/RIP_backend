@@ -1,5 +1,5 @@
 body {
-    background-image: url('../img/background_order.png');
+    background-image: url('http://127.0.0.1:9000/ibm-pictures/img/background_order.png');
     background-repeat: no-repeat; /* Отключает повторение изображения */
     background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
     background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */

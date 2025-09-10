@@ -7,7 +7,7 @@
 <body>
     <header>
         <h1>
-            <a href="/IBM"><img src="/static/img/image.png" alt="home"></a>
+            <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home"></a>
         </h1>
     </header>
     <div class="content">
@@ -20,7 +20,7 @@
             </div>
             {{ range .task.Gates }}
                 <div class="task-gates-cards">
-                    <img src="/static/img/{{ .Image }}" width="70px" height="50px" alt="theme">
+                    <img src={{ .Image }} width="70px" height="50px" alt="theme">
                     <div class="task-card-name">
                         <p> {{ .Title }} </p>
                     </div>
@@ -31,7 +31,7 @@
                     </div>
                 {{ end }}
                     <div class="task-card-trash">
-                        <img src="/static/img/trash.png" alt="trash">
+                        <img src="http://127.0.0.1:9000/ibm-pictures/img/trash.png" alt="trash">
                     </div>
                 </div>
             {{ end }}
