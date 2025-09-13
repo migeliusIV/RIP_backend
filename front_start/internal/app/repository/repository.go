@@ -20,6 +20,7 @@ type Gate struct {
 	Image       string
 	IsEditable  bool
 	TheAxis     string
+	Degrees     float32
 }
 
 func (r *Repository) GetGates() ([]Gate, error) {
@@ -51,6 +52,7 @@ func (r *Repository) GetGates() ([]Gate, error) {
 			Image:       "http://127.0.0.1:9000/ibm-pictures/img/X-rot-gate.png",
 			IsEditable:  true,
 			TheAxis:     "X",
+			Degrees:     30,
 		},
 		{
 			ID:          4,
@@ -60,6 +62,7 @@ func (r *Repository) GetGates() ([]Gate, error) {
 			Image:       "http://127.0.0.1:9000/ibm-pictures/img/Y-rot-gate.png",
 			IsEditable:  true,
 			TheAxis:     "Y",
+			Degrees:     30,
 		},
 		{
 			ID:          5,
@@ -69,6 +72,7 @@ func (r *Repository) GetGates() ([]Gate, error) {
 			Image:       "http://127.0.0.1:9000/ibm-pictures/img/Z-rot-gate.png",
 			IsEditable:  true,
 			TheAxis:     "Z",
+			Degrees:     30,
 		},
 		{
 			ID:          6,
@@ -121,8 +125,10 @@ func (r *Repository) GetGatesByTitle(title string) ([]Gate, error) {
 }
 
 type Task struct {
-	ID_task int
-	Gates   []Gate
+	ID_task     int
+	Gates       []Gate
+	Description string
+	Result      string
 }
 
 func (r *Repository) GetTasks() ([]Task, error) {
@@ -139,6 +145,8 @@ func (r *Repository) GetTasks() ([]Task, error) {
 				gates[1],
 				gates[3],
 			},
+			Result:      "0.2588|0⟩ + 0.9659|1⟩",
+			Description: "Компания АБВГД. Задача номер 1. Опровержение статистических гипотез.",
 		},
 	}
 
