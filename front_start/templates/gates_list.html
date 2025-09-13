@@ -11,15 +11,15 @@
     </header>
 
     <div><p class="gates-s-t">Выберите однокубитную операцию</p></div>
-
-    <form action="/IBM" method="GET" class="gates-s-f">
-        <input type="text" name="query" placeholder="Введите название гейта" value="{{ .query }}">
-        <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать
-        введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
-        <button type="submit">Найти</button>
-    </form>
-
+    
     <div class="gates-t-b">
+        <form action="/IBM" method="GET" class="gates-s-f">
+            <input type="text" name="query" placeholder="Введите название гейта" value="{{ .query }}">
+            <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать
+            введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
+            <button type="submit">Найти</button>
+        </form>
+
         <div class="image-with-text">
             <a href="/task/1">
                 <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">

@@ -28,13 +28,14 @@ header img { /*задаем размер картинки*/
 /*------searching-field--------*/
 .gates-s-f {
     display: flex;
-    max-width: 700px;
+    max-width: 1000px;
     margin: 20px 40px;
     font-family: IBM Plex Mono;
 }
 
 .gates-s-f input[type="text"] {
     flex: 1;
+    width: 500px;
     padding: 12px 16px;
     border: 2px solid #e1e5eb;
     border-right: none;
@@ -71,12 +72,9 @@ header img { /*задаем размер картинки*/
 }
 /*--------task-button--------*/
 .gates-t-b {
-    flex: 1;
-    position: fixed;
-    left: 20px;    /* отступ от левого края */
-    bottom: 20px;  /* отступ от нижнего края */
+    flex: 0;
     z-index: 1000; /* чтобы был поверх других элементов */
-    display: inline-block;
+    display: flex;
 }
 
 .image-with-text {
@@ -97,7 +95,7 @@ header img { /*задаем размер картинки*/
 }
 
 .image-with-text img {
-    display: block;
+    flex: 1;
     position: relative;
     z-index: 1;
 }
