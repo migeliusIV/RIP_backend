@@ -22,6 +22,7 @@ func NewHandler(r *repository.Repository) *Handler {
 func (h *Handler) GetGates(ctx *gin.Context) {
 	var gates []repository.Gate
 	var err error
+	taskId := 1
 
 	searchQuery := ctx.Query("query") // получаем значение из поля поиска
 	if searchQuery == "" {            // если поле поиска пусто, то просто получаем из репозитория все записи
@@ -36,9 +37,17 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 		}
 	}
 
+	taskInfo, err := h.Repository.GetTask(taskId)
+	if err != nil {
+		logrus.Error(err)
+	}
+	currentCounter := len(taskInfo.GatesFull)
+
 	ctx.HTML(http.StatusOK, "gates_list.html", gin.H{
-		"gates": gates,
-		// в ином случае оно будет очищаться при нажатии на кнопку
+		"gates":   gates,
+		"query":   searchQuery,
+		"counter": currentCounter,
+		"taskId":  taskId,
 	})
 }
 
