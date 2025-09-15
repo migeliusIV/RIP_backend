@@ -2,8 +2,6 @@ package handler
 
 import (
 	"front_start/internal/app/repository"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -19,70 +17,23 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) GetGates(ctx *gin.Context) {
-	var gates []repository.Gate
-	var err error
-	taskId := 1
-
-	searchQuery := ctx.Query("query") // получаем значение из поля поиска
-	if searchQuery == "" {            // если поле поиска пусто, то просто получаем из репозитория все записи
-		gates, err = h.Repository.GetGates()
-		if err != nil {
-			logrus.Error(err)
-		}
-	} else {
-		gates, err = h.Repository.GetGatesByTitle(searchQuery) // в ином случае ищем заказ по заголовку
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-
-	taskInfo, err := h.Repository.GetTask(taskId)
-	if err != nil {
-		logrus.Error(err)
-	}
-	currentCounter := len(taskInfo.GatesFull)
-
-	ctx.HTML(http.StatusOK, "gates_list.html", gin.H{
-		"gates":   gates,
-		"query":   searchQuery,
-		"counter": currentCounter,
-		"taskId":  taskId,
-	})
+// RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
+func (h *Handler) RegisterHandler(router *gin.Engine) {
+	router.GET("/", h.GetOrders)
+	router.GET("/order/:id", h.GetOrder)
 }
 
-func (h *Handler) GetGate(ctx *gin.Context) {
-	idStr := ctx.Param("id") // получаем id заказа из урла (то есть из /order/:id)
-	// через двоеточие мы указываем параметры, которые потом сможем считать через функцию выше
-	id, err := strconv.Atoi(idStr) // так как функция выше возвращает нам строку, нужно ее преобразовать в int
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	gate, err := h.Repository.GetGate(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "properties.html", gin.H{
-		"gate": gate,
-	})
+// RegisterStatic То же самое, что и с маршрутами, регистрируем статику
+func (h *Handler) RegisterStatic(router *gin.Engine) {
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/resources", "./resources")
 }
 
-func (h *Handler) GetTask(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	task, err := h.Repository.GetTask(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "task.html", gin.H{
-		"task": task,
+// errorHandler для более удобного вывода ошибок
+func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
+	logrus.Error(err.Error())
+	ctx.JSON(errorStatusCode, gin.H{
+		"status":      "error",
+		"description": err.Error(),
 	})
 }
