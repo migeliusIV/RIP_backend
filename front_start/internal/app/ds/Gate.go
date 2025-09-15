@@ -1,7 +1,7 @@
 package ds
 
 type Gate struct {
-	ID_gate     uint   `gorm:"primaryKey"`
+	ID_gate     uint   `gorm:"column:id_gate;primaryKey"`
 	Title       string `gorm:"not null;unique"`
 	Description string `gorm:"not null"`
 	Status      bool   `gorm:"default:true"`
@@ -12,6 +12,6 @@ type Gate struct {
 	IsEditable bool `gorm:"default:false"`
 	TheAxis    string
 
-	// Связи
-	DegreesToGates []DegreesToGates `gorm:"foreignKey:ID_gate" json:"-"`
+	// связи
+	//Gate DegreesToGates `gorm:"foreignKey:ID_gate;references:ID_gate"`
 }

@@ -3,7 +3,7 @@ package ds
 import "time"
 
 type Task struct {
-	ID_task        uint      `gorm:"primaryKey"`
+	ID_task        uint      `gorm:"column:id_task;primaryKey"`
 	TeskStatus     string    `gorm:"column:tesk_status;not null;default:черновик"`
 	CreationDate   time.Time `gorm:"column:creation_date;not null"`
 	ID_user        uint      `gorm:"column:id_user;not null"`
@@ -15,7 +15,7 @@ type Task struct {
 	Result          string
 
 	// Связи
-	User      Users            `gorm:"foreignKey:ID_user;references:ID_user"`
-	Moderator Users            `gorm:"foreignKey:ID_moderator;references:ID_user"`
-	Degrees   []DegreesToGates `gorm:"foreignKey:ID_task"`
+	Task DegreesToGates `gorm:"foreignKey:ID_task;references:ID_task"`
+	// User      Users `gorm:"foreignKey:ID_user;references:ID_user"`
+	// Moderator Users `gorm:"foreignKey:ID_moderator;references:ID_user"`
 }
