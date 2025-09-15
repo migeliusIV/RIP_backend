@@ -18,15 +18,18 @@ func NewHandler(r *repository.Repository) *Handler {
 }
 
 // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
-func (h *Handler) RegisterHandler(router *gin.Engine) {
-	router.GET("/", h.GetOrders)
-	router.GET("/order/:id", h.GetOrder)
+func (handler *Handler) RegisterHandler(r *gin.Engine) {
+	r.GET("/IBM", handler.GetGates)
+	r.GET("/gate_property/:id", handler.GetGateByID)
+	//r.GET("/task/:id", handler.GetTask)
+	//r.POST("/task/add/gate/:gate_id", handler.) - добавление в заявку через ORM
+	//r.POST("/task/:task_id/delete", handler.) - удаление заявки через SQL
 }
 
 // RegisterStatic То же самое, что и с маршрутами, регистрируем статику
 func (h *Handler) RegisterStatic(router *gin.Engine) {
 	router.LoadHTMLGlob("templates/*")
-	router.Static("/resources", "./resources")
+	router.Static("/static", "./resources")
 }
 
 // errorHandler для более удобного вывода ошибок

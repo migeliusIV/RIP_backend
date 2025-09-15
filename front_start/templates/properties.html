@@ -15,15 +15,15 @@
         <div class="prop-card">
             <div class="prop-crd-cnt">
                 <div class="prop-crd-text">
-                    <p class="prop-crd-ttl">{{ .gate.Title }}</p>
-                    <p class="prop-crd-dscr">{{ .gate.FullInfo }}</p>
-                    {{ if .gate.IsEditable }}
+                    <p class="prop-crd-ttl">{{ .Title }}</p>
+                    <p class="prop-crd-dscr">{{ .FullInfo }}</p>
+                    {{ if .IsEditable }}
                         <div class="attributes">
                             <div class="attribute-editable">
                                 <p>Требуется ввод данных</p>
                             </div>
                             <div class="attribute-axis">
-                                <p>Изменение по оси {{ .gate.TheAxis }}</p>
+                                <p>Изменение по оси {{ .TheAxis }}</p>
                             </div>
                         </div>
                         {{ else }}
@@ -33,7 +33,7 @@
                         {{ end }}
                 </div>
                 <div class="prop-crd-img">
-                    <img src={{ .gate.Image }} alt="home">
+                    <img src={{ .Image }} alt="home">
                 </div>
             </div>
         <a class="card-button-back" href="/IBM">Назад</a>
