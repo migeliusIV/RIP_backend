@@ -13,7 +13,7 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 	var gates []ds.Gate
 	var err error
 
-	search := ctx.Query("search")
+	search := ctx.Query("query")
 	if search == "" {
 		gates, err = h.Repository.GetGates()
 	} else {
