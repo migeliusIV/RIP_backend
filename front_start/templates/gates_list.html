@@ -20,12 +20,21 @@
             <button type="submit">Найти</button>
         </form>
 
-        <div class="image-with-text">
-            <a href="/task/1">
-                <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">
-            </a>
-            <p class="overlay-text"> {{ .counter }} </p>
-        </div>
+        {{ if gt .gatesCount 0 }} 
+            <div class="image-with-text">
+                <a href="/task/{{ .taskID }}">
+                    <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">
+                </a>
+                <p class="overlay-text"> {{ .gatesCount }} </p>
+            </div>
+        {{ else }}
+            <div class="image-with-text">
+                <a style="cursor: not-allowed;">
+                    <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="task" style="opacity: 0.5;">
+                </a>
+                <p class="overlay-text"> {{ .gatesCount }} </p>
+            </div>
+        {{ end }}
     </div>
 
     <div class="gates-templ">

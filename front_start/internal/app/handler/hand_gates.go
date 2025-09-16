@@ -28,27 +28,24 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 		return
 	}
 
-	/*
-		draftFrax, _ := h.Repository.GetOrCreateDraftFrax(hardcodedUserID)
-		var fraxID uint = 0
-		var factorsCount int = 0
+	draftTask, _ := h.Repository.GetDraftTask(hardcodedUserID)
+	var taskID uint = 0
+	var gatesCount int = 0
 
-		if draftFrax != nil {
-			// Загружаем связанные факторы, чтобы посчитать их количество
-			fullFrax, err := h.Repository.GetFraxWithFactors(draftFrax.ID)
-			if err == nil {
-				fraxID = fullFrax.ID
-				factorsCount = len(fullFrax.FactorsLink)
-			}
+	if draftTask != nil {
+		// Загружаем связанные факторы, чтобы посчитать их количество
+		fullTask, err := h.Repository.GetTaskWithGates(draftTask.ID_task)
+		if err == nil {
+			taskID = fullTask.ID_task
+			gatesCount = len(fullTask.Task)
 		}
-	*/
+	}
+
 	ctx.HTML(http.StatusOK, "gates_list.html", gin.H{
-		"gates": gates,
-		"query": search,
-		/*
-			"fraxID":        fraxID,
-			"factorsCount":  factorsCount,
-		*/
+		"gates":      gates,
+		"query":      search,
+		"taskID":     taskID,
+		"gatesCount": gatesCount,
 	})
 }
 
