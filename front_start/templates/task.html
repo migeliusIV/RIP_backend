@@ -9,6 +9,14 @@
             <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home"></a>
         </h1>
     </header>
+        <div class="result">
+            <div class="result-header">
+                <p>Результат</p>
+            </div> 
+            <div class="result-field">
+                <input type="text" name="userName" value="{{ .task.Result }}" class="res-form"/>
+            </div> 
+        </div>
     <div class="task-content">
         <div class="description">
             <div class="description-header">
@@ -22,14 +30,6 @@
             </div>
         </div>
         
-        <div class="result">
-            <div class="result-header">
-                <p>Результат</p>
-            </div> 
-            <div class="result-field">
-                <input type="text" name="userName" value="{{ .task.Result }}" class="res-form"/>
-            </div> 
-        </div>
     </div>
     <div class="task-gates">
         <div class="task-gates-header">
@@ -50,9 +50,9 @@
                     <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>
                 </div>
             {{ end }}
-                <div class="task-card-trash">
+                <!--<div class="task-card-trash">
                     <img src="http://127.0.0.1:9000/ibm-pictures/img/trash.png" alt="trash">
-                </div>
+                </div>-->
             </div>
         {{ end }}
     </div>
