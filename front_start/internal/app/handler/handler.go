@@ -22,8 +22,8 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	r.GET("/IBM", handler.GetGates)
 	r.GET("/gate_property/:id", handler.GetGateByID)
 	r.GET("/task/:id", handler.GetTask)
-	//r.POST("/task/add/gate/:gate_id", handler.) - добавление в заявку через ORM
-	//r.POST("/task/:task_id/delete", handler.) - удаление заявки через SQL
+	r.POST("/task/add/gate/:id_gate", handler.AddGateToTask) // orm
+	r.POST("/task/:task_id/delete", handler.DeleteTask)      // удаление заявки через SQL
 }
 
 // RegisterStatic То же самое, что и с маршрутами, регистрируем статику

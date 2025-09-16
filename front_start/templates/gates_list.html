@@ -55,7 +55,9 @@
                 <div class="gates-crd-img"><img src={{ .Image }} alt="home"></div>
             </div>
             <div class="buttons">
-                <a class="card-button-add" href="/gate_property/{{ .ID_gate }}">Добавить</a>
+                <form action="/task/add/gate/{{ .ID_gate }}" method="POST" style="display: inline;">
+                    <button type="submit" class="card-button-add">Добавить</button>
+                </form>                
                 <a class="card-button-more" href="/gate_property/{{ .ID_gate }}">Подробнее</a>
             </div>
         </div>

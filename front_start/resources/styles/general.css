@@ -546,3 +546,32 @@ header img { /*задаем размер картинки*/
     width: 30px;
     height: 30px;
 }
+/*-------btn--------*/
+.task-button {
+    margin-top: 30px;
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.task-delete-btn {
+    width: 100px;
+    height: 70px;
+    border-radius: 5px;
+    color: white;
+    background-color: rgba(52, 58, 63, 1);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.task-delete-btn:hover {
+    background-color: rgba(32, 38, 43, 1);
+    text-decoration: none;
+    color: white;
+}

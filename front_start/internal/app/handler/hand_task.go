@@ -13,7 +13,7 @@ import (
 const hardcodedUserID = 1
 
 func (h *Handler) AddGateToTask(c *gin.Context) {
-	taskID, err := strconv.Atoi(c.Param("id_task"))
+	gateID, err := strconv.Atoi(c.Param("id_gate"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
@@ -35,7 +35,7 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 		return
 	}
 
-	if err = h.Repository.AddGateToTask(task.ID_task, uint(taskID)); err != nil {
+	if err = h.Repository.AddGateToTask(task.ID_task, uint(gateID)); err != nil {
 	}
 
 	c.Redirect(http.StatusFound, "/IBM")
