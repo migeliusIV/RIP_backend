@@ -15,7 +15,7 @@ type Task struct {
 	Result          string
 
 	// Связи
-	Task DegreesToGates `gorm:"foreignKey:ID_task;references:ID_task"`
+	Task []DegreesToGates `gorm:"foreignKey:ID_task;references:ID_task"`
 	// User      Users `gorm:"foreignKey:ID_user;references:ID_user"`
 	// Moderator Users `gorm:"foreignKey:ID_moderator;references:ID_user"`
 }

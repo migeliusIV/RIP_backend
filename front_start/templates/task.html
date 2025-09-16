@@ -18,7 +18,7 @@
                 <p>Добавьте описание задачи, чтобы не перепутать её с другими.</p>
             </div>
             <div class="description-field">
-                <textarea type="text" name="userName" class="desc-form">{{ .task.Description }}</textarea>
+                <textarea type="text" name="userName" class="desc-form">{{ .TaskDescription }}</textarea>
             </div>
         </div>
         
@@ -27,7 +27,7 @@
                 <p>Результат</p>
             </div> 
             <div class="result-field">
-                <input type="text" name="userName" value="{{ .task.Result }}" class="res-form"/>
+                <input type="text" name="userName" value="{{ .Result }}" class="res-form"/>
             </div> 
         </div>
     </div>
@@ -38,13 +38,13 @@
         <div class="task-gates-text">
             <p>Для этого расположите карточки в необходимом порядке и введите углы для операций вращения.</p>
         </div>
-        {{ range .task.GatesFull }}
+        {{ range .Task }}
             <div class="task-gates-cards">
-                <img src={{ .CurrentGate.Image }} width="70px" height="50px" alt="theme">
+                <img src={{ .Gate.Image }} width="70px" height="50px" alt="theme">
                 <div class="task-card-name">
-                    <p> {{ .CurrentGate.Title }} </p>
+                    <p> {{ .Gate.Title }} </p>
                 </div>
-            {{ if .CurrentGate.IsEditable }}
+            {{ if .Gate.IsEditable }}
                 <div class="task-card-appendix">
                     <p> θ =</p>
                     <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>

@@ -1,67 +1,72 @@
 package repository
 
-/*
-// GetOrCreateDraftFrax находит заявку-черновик для пользователя или создает новую.
-// Временно используем userID = 1, как "захардкоженный" ID пользователя-модератора.
-func (r *Repository) GetOrCreateDraftFrax(userID uint) (*ds.FraxSearching, error) {
-	var frax ds.FraxSearching
+import (
+	"errors"
+	"fmt"
+	"front_start/internal/app/ds"
 
-	// Ищем черновик у пользователя
-	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&frax).Error
+	"gorm.io/gorm"
+)
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		// Если не нашли, создаем новый черновик
-		newFrax := ds.FraxSearching{
-			CreatorID: userID,
-			Status:    ds.StatusDraft,
-		}
-		if err := r.db.Create(&newFrax).Error; err != nil {
-			return nil, err
-		}
-		return &newFrax, nil
+func (r *Repository) GetDraftTask(userID uint) (*ds.Task, error) {
+	var task ds.Task
+
+	err := r.db.Where("id_user = ? AND tesk_status = ?", userID, ds.StatusDraft).First(&task).Error
+	if err != nil {
+		return nil, err
 	}
-
-	return &frax, err
+	return &task, nil
 }
 
-// AddFactorToFrax добавляет фактор в заявку (создает запись в таблице m-m).
-func (r *Repository) AddFactorToFrax(fraxID, factorID uint) error {
+func (r *Repository) CreateTask(task *ds.Task) error {
+	return r.db.Create(task).Error
+}
+
+// AddGateToTask добавляет гейт в задачу (создает запись в таблице m-m).
+func (r *Repository) AddGateToTask(taskID, gateID uint) error {
 	// Проверяем, нет ли уже такого фактора в заявке, чтобы избежать дублей
 	var count int64
-	r.db.Model(&ds.FactorToFrax{}).Where("frax_id = ? AND factor_id = ?", fraxID, factorID).Count(&count)
+	r.db.Model(&ds.DegreesToGates{}).Where("id_task = ? AND id_gate = ?", taskID, gateID).Count(&count)
 	if count > 0 {
-		return errors.New("factor already in frax")
+		return errors.New("gate already in task")
 	}
 
-	link := ds.FactorToFrax{
-		FraxID:   fraxID,
-		FactorID: factorID,
+	link := ds.DegreesToGates{
+		ID_task: taskID,
+		ID_gate: gateID,
+		Degrees: 0,
 	}
 	return r.db.Create(&link).Error
 }
 
-// GetFraxWithFactors получает заявку со всеми связанными факторами.
-// Используем Preload для эффективной загрузки связанных данных.
-func (r *Repository) GetFraxWithFactors(fraxID uint) (*ds.FraxSearching, error) {
-	var frax ds.FraxSearching
+// GetTaskWithGates получает задачу со всеми связанными гейтами и их углами поворота.
+func (r *Repository) GetTaskWithGates(taskID uint) (*ds.Task, error) {
+	var task ds.Task
 
-	err := r.db.Preload("FactorsLink.Factor").First(&frax, fraxID).Error
+	// Используем Preload для загрузки связанных данных через связующую таблицу
+	err := r.db.
+		Preload("Task.Gate").
+		First(&task, taskID).
+		Error
+
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("task not found")
+		}
+		return nil, fmt.Errorf("error fetching task: %v", err)
 	}
 
-	// Проверяем, что заявка не удалена
-	if frax.Status == ds.StatusDeleted {
-		return nil, errors.New("frax page not found or has been deleted")
+	// Проверяем, что задача не удалена (адаптируйте под ваши статусы)
+	if task.TeskStatus == ds.StatusDeleted {
+		return nil, errors.New("task not found or has been deleted")
 	}
 
-	return &frax, nil
+	return &task, nil
 }
 
 // LogicallyDeleteFrax выполняет логическое удаление заявки через чистый SQL UPDATE.
-func (r *Repository) LogicallyDeleteFrax(fraxID uint) error {
+func (r *Repository) LogicallyDeleteFrax(taskID uint) error {
 	// Используем Exec для выполнения "сырого" SQL-запроса
-	result := r.db.Exec("UPDATE frax_searchings SET status = ? WHERE id = ?", ds.StatusDeleted, fraxID)
+	result := r.db.Exec("UPDATE task SET tesk_status = ? WHERE id_task = ?", ds.StatusDeleted, taskID)
 	return result.Error
 }
-*/
