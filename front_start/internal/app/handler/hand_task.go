@@ -59,7 +59,7 @@ func (h *Handler) GetTask(c *gin.Context) {
 			return
 		}
 	*/
-	c.HTML(http.StatusOK, "task.html", task)
+	c.HTML(http.StatusOK, "quantum_task.html", task)
 }
 
 func (h *Handler) DeleteTask(c *gin.Context) {

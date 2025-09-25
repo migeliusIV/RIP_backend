@@ -13,7 +13,7 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 	var gates []ds.Gate
 	var err error
 
-	search := ctx.Query("query")
+	search := ctx.Query("gateSearching")
 	if search == "" {
 		gates, err = h.Repository.GetGates()
 	} else {
@@ -42,10 +42,10 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 	}
 
 	ctx.HTML(http.StatusOK, "gates_list.html", gin.H{
-		"gates":      gates,
-		"query":      search,
-		"taskID":     taskID,
-		"gatesCount": gatesCount,
+		"gates":         gates,
+		"gateSearching": search,
+		"taskID":        taskID,
+		"gatesCount":    gatesCount,
 	})
 }
 
@@ -69,5 +69,5 @@ func (h *Handler) GetGateByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(http.StatusOK, "properties.html", gate)
+	ctx.HTML(http.StatusOK, "gate_properties.html", gate)
 }

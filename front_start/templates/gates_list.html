@@ -14,15 +14,15 @@
     
     <div class="gates-t-b">
         <form action="/IBM" method="GET" class="gates-s-f">
-            <input type="text" name="query" placeholder="Введите название гейта" value="{{ .query }}">
-            <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать
+            <input type="text" name="gateSearching" placeholder="Введите название гейта" value="{{ .gateSearching }}">
+            <!-- value="{{ .gateSearching }}"  нужно для того, чтобы из обработчика передавать
             введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
             <button type="submit">Найти</button>
         </form>
 
         {{ if gt .gatesCount 0 }} 
             <div class="image-with-text">
-                <a href="/task/{{ .taskID }}">
+                <a href="/quantum_task/{{ .taskID }}">
                     <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">
                 </a>
                 <p class="overlay-text"> {{ .gatesCount }} </p>
@@ -64,7 +64,7 @@
                 <div class="gates-crd-img"><img src={{ .Image }} alt="home"></div>
             </div>
             <div class="buttons">
-                <form action="/task/add/gate/{{ .ID_gate }}" method="POST" style="display: inline;">
+                <form action="/quantum_task/add/gate/{{ .ID_gate }}" method="POST" style="display: inline;">
                     <button type="submit" class="card-button-add">Добавить</button>
                 </form>                
                 <a class="card-button-more" href="/gate_property/{{ .ID_gate }}">Подробнее</a>
