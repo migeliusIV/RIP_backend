@@ -17,7 +17,7 @@
                 <div class="prop-crd-text">
                     <p class="prop-crd-ttl">{{ .gate.Title }}</p>
                     <p class="prop-crd-dscr">{{ .gate.FullInfo }}</p>
-                    {{ if .gate.IsEditable }}
+                    {{ if ne .gate.TheAxis "NULL"  }}
                         <div class="attributes">
                             <div class="attribute-editable">
                                 <p>Требуется ввод данных</p>

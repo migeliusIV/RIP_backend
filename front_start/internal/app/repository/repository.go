@@ -18,7 +18,6 @@ type Gate struct {
 	Description string
 	FullInfo    string
 	Image       string
-	IsEditable  bool
 	TheAxis     string
 }
 
@@ -34,8 +33,7 @@ var gates = []Gate{
 		Description: "Не изменяет состояния кубита.",
 		FullInfo:    "\tНичего не делает с состоянием кубита. Оставляет его без изменений.",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/I-gate.png",
-		IsEditable:  false,
-		TheAxis:     "",
+		TheAxis:     "NULL",
 	},
 	{
 		ID:          2,
@@ -43,8 +41,7 @@ var gates = []Gate{
 		Description: "Инвертирует состояние кубита.",
 		FullInfo:    "\tАналог классического NOT-гейта. Переворачивает состояние кубита.",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/X-gate.png",
-		IsEditable:  false,
-		TheAxis:     "",
+		TheAxis:     "NULL",
 	},
 	{
 		ID:          3,
@@ -52,7 +49,6 @@ var gates = []Gate{
 		Description: "Вращает кубит вокруг оси X на угол тэта.",
 		FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси X.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/X-rot-gate.png",
-		IsEditable:  true,
 		TheAxis:     "X",
 	},
 	{
@@ -61,7 +57,6 @@ var gates = []Gate{
 		Description: "Вращает кубит вокруг оси Y на угол тэта.",
 		FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси Y.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/Y-rot-gate.png",
-		IsEditable:  true,
 		TheAxis:     "Y",
 	},
 	{
@@ -70,7 +65,6 @@ var gates = []Gate{
 		Description: "Вращает кубит вокруг оси Z на угол тэта.",
 		FullInfo:    "\tЭта операция вращает состояние кубита на сфере Блоха вокруг оси Z.\n\tЗначение угла поворота можно задать при компановке выражения (в деталях калькуляции).",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/Z-rot-gate.png",
-		IsEditable:  true,
 		TheAxis:     "Z",
 	},
 	{
@@ -79,8 +73,7 @@ var gates = []Gate{
 		Description: "Создает равномерную суперпозицию из базисного состояния.",
 		FullInfo:    "\tОперация поворачивает кубит на 90 градусов вокруг оси Y, затем на 180 градусов вокруг оси X.\n\tЭто один из самых важных гейтов.",
 		Image:       "http://127.0.0.1:9000/ibm-pictures/img/H-gate.png",
-		IsEditable:  false,
-		TheAxis:     "",
+		TheAxis:     "NULL",
 	},
 }
 

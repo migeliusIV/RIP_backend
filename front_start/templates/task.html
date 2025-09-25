@@ -44,7 +44,7 @@
                 <div class="task-card-name">
                     <p> {{ .CurrentGate.Title }} </p>
                 </div>
-            {{ if .CurrentGate.IsEditable }}
+            {{ if ne .CurrentGate.TheAxis "NULL" }}
                 <div class="task-card-appendix">
                     <p> θ =</p>
                     <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>
