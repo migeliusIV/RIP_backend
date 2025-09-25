@@ -25,15 +25,6 @@
         <div class="task-button">
             <a class="task-delete-btn" href="/task/{{ .ID_task }}/delete">Удалить задачу</a>
         </div>
-
-        <div class="result">
-            <div class="result-header">
-                <p>Результат</p>
-            </div> 
-            <div class="result-field">
-                <input type="text" name="userName" value="{{ .Result }}" class="res-form"/>
-            </div> 
-        </div>
     </div>
     <div class="task-gates">
         <div class="task-gates-header">
@@ -54,11 +45,21 @@
                     <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>
                 </div>
             {{ end }}
+            <!--
                 <div class="task-card-trash">
                     <img src="http://127.0.0.1:9000/ibm-pictures/img/trash.png" alt="trash">
                 </div>
+            -->
             </div>
         {{ end }}
     </div>
+    <div class="result">
+            <div class="result-header">
+                <p>Результат</p>
+            </div> 
+            <div class="result-field">
+                <input type="text" name="userName" value="{{ .Result }}" class="res-form"/>
+            </div> 
+        </div>
 </body>
 </html>
