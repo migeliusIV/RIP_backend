@@ -21,9 +21,9 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 
 	task, err := h.Repository.GetDraftTask(hardcodedUserID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		newTask := ds.Task{
+		newTask := ds.QuantumTask{
 			ID_user:    hardcodedUserID,
-			TeskStatus: ds.StatusDraft,
+			TaskStatus: ds.StatusDraft,
 		}
 		if createErr := h.Repository.CreateTask(&newTask); createErr != nil {
 			h.errorHandler(c, http.StatusInternalServerError, createErr)
@@ -53,12 +53,12 @@ func (h *Handler) GetTask(c *gin.Context) {
 		h.errorHandler(c, http.StatusNotFound, err)
 		return
 	}
-	/*
-		if len(task.FactorsLink) == 0 {
-			h.errorHandler(c, http.StatusForbidden, errors.New("cannot access an empty frax page, add factors first"))
-			return
-		}
-	*/
+
+	if len(task.GatesDegrees) == 0 {
+		h.errorHandler(c, http.StatusForbidden, errors.New("cannot access an empty frax page, add factors first"))
+		return
+	}
+
 	c.HTML(http.StatusOK, "quantum_task.html", task)
 }
 

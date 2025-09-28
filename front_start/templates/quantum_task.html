@@ -33,13 +33,13 @@
         <div class="task-gates-text">
             <p>Для этого расположите карточки в необходимом порядке и введите углы для операций вращения.</p>
         </div>
-        {{ range .Task }}
+        {{ range .QuantumTask }}
             <div class="task-gates-cards">
                 <img src={{ .Gate.Image }} width="70px" height="50px" alt="theme">
                 <div class="task-card-name">
                     <p> {{ .Gate.Title }} </p>
                 </div>
-            {{ if .Gate.IsEditable }}
+            {{ if isNotNull .Gate.TheAxis }}
                 <div class="task-card-appendix">
                     <p> θ =</p>
                     <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>

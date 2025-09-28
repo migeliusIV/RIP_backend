@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func (r *Repository) GetDraftTask(userID uint) (*ds.Task, error) {
-	var task ds.Task
+func (r *Repository) GetDraftTask(userID uint) (*ds.QuantumTask, error) {
+	var task ds.QuantumTask
 
 	err := r.db.Where("id_user = ? AND tesk_status = ?", userID, ds.StatusDraft).First(&task).Error
 	if err != nil {
@@ -18,7 +18,7 @@ func (r *Repository) GetDraftTask(userID uint) (*ds.Task, error) {
 	return &task, nil
 }
 
-func (r *Repository) CreateTask(task *ds.Task) error {
+func (r *Repository) CreateTask(task *ds.QuantumTask) error {
 	return r.db.Create(task).Error
 }
 
@@ -34,18 +34,17 @@ func (r *Repository) AddGateToTask(taskID, gateID uint) error {
 	link := ds.DegreesToGates{
 		ID_task: taskID,
 		ID_gate: gateID,
-		Degrees: 0,
 	}
 	return r.db.Create(&link).Error
 }
 
 // GetTaskWithGates получает задачу со всеми связанными гейтами и их углами поворота.
-func (r *Repository) GetTaskWithGates(taskID uint) (*ds.Task, error) {
-	var task ds.Task
+func (r *Repository) GetTaskWithGates(taskID uint) (*ds.QuantumTask, error) {
+	var task ds.QuantumTask
 
 	// Используем Preload для загрузки связанных данных через связующую таблицу
 	err := r.db.
-		Preload("Task.Gate").
+		Preload("GatesDegrees.Gate").
 		First(&task, taskID).
 		Error
 
@@ -57,7 +56,7 @@ func (r *Repository) GetTaskWithGates(taskID uint) (*ds.Task, error) {
 	}
 
 	// Проверяем, что задача не удалена (адаптируйте под ваши статусы)
-	if task.TeskStatus == ds.StatusDeleted {
+	if task.TaskStatus == ds.StatusDeleted {
 		return nil, errors.New("task not found or has been deleted")
 	}
 

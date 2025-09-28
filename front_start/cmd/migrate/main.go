@@ -20,7 +20,7 @@ func main() {
 	err = db.AutoMigrate(
 		&ds.DegreesToGates{},
 		&ds.Gate{},
-		&ds.Task{},
+		&ds.QuantumTask{},
 		&ds.Users{},
 	)
 	if err != nil {

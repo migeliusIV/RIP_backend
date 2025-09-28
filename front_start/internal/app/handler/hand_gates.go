@@ -37,7 +37,7 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 		fullTask, err := h.Repository.GetTaskWithGates(draftTask.ID_task)
 		if err == nil {
 			taskID = fullTask.ID_task
-			gatesCount = len(fullTask.Task)
+			gatesCount = len(fullTask.GatesDegrees)
 		}
 	}
 
