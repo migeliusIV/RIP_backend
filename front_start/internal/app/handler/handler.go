@@ -19,11 +19,37 @@ func NewHandler(r *repository.Repository) *Handler {
 
 // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
 func (handler *Handler) RegisterHandler(r *gin.Engine) {
+	//r.POST("/quantum_task/add/gate/:id_gate", handler.AddGateToTask) // orm
+	//r.POST("/quantum_task/:task_id/delete", handler.DeleteTask)      // удаление заявки через SQL
+
+	// Домен услуг (гейтов)
 	r.GET("/IBM", handler.GetGates)
 	r.GET("/gate_property/:id", handler.GetGateByID)
+	// r.POST("/factors", h.CreateFactor)
+	// r.PUT("/factors/:id", h.UpdateFactor)
+	// r.DELETE("/factors/:id", h.DeleteFactor)
+	// r.POST("/frax/draft/factors/:factor_id", h.AddFactorToDraft)
+	// r.POST("/factors/:id/image", h.UploadFactorImage)
+
+	// Домен заявок (задач)
 	r.GET("/quantum_task/:id", handler.GetTask)
-	r.POST("/quantum_task/add/gate/:id_gate", handler.AddGateToTask) // orm
-	r.POST("/quantum_task/:task_id/delete", handler.DeleteTask)      // удаление заявки через SQL
+	// r.GET("/frax/cart", h.GetCartBadge)
+	// r.GET("/frax", h.ListFrax)
+	// r.PUT("/frax/:id", h.UpdateFrax)
+	// r.PUT("/frax/:id/form", h.FormFrax)
+	// r.PUT("/frax/:id/resolve", h.ResolveFrax)
+	// r.DELETE("/frax/:id", h.DeleteFrax)
+
+	// Домен м-м
+	// r.DELETE("/frax/:id/factors/:factor_id", h.RemoveFactorFromFrax)
+	// r.PUT("/frax/:id/factors/:factor_id", h.UpdateMM)
+
+	// Домен пользователей
+	// r.POST("/users", h.Register)
+	// r.GET("/users/:id", h.GetUserData)
+	// r.PUT("/users/:id", h.UpdateUserData)
+	// r.POST("/auth/login", h.Login)
+	// r.POST("/auth/logout", h.Logout)
 }
 
 // RegisterStatic То же самое, что и с маршрутами, регистрируем статику
