@@ -16,6 +16,7 @@ type QuantumTask struct {
 
 	// Несущая связь
 	GatesDegrees []DegreesToGates `gorm:"foreignKey:ID_task;references:ID_task"`
-	User         Users            `gorm:"foreignKey:ID_user;references:ID_user"`
 	Moderator    Users            `gorm:"foreignKey:ID_moderator;references:ID_user"`
+	// Связь для программы
+	User Users `gorm:"foreignKey:ID_user;references:ID_user"`
 }

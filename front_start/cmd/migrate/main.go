@@ -18,10 +18,10 @@ func main() {
 
 	// Migrate the schema
 	err = db.AutoMigrate(
-		&ds.DegreesToGates{},
-		&ds.Gate{},
 		&ds.QuantumTask{},
 		&ds.Users{},
+		&ds.DegreesToGates{},
+		&ds.Gate{},
 	)
 	if err != nil {
 		panic("cant migrate db")

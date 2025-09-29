@@ -5,6 +5,6 @@ type Users struct {
 	Login    string `gorm:"column:login;not null;size:255;unique"`
 	Password string `gorm:"column:password;size:255;not null"`
 	IsAdmin  bool   `gorm:"column:is_admin;default:false"`
-	// Связь для приложения
-	//Tasks []QuantumTask `gorm:"foreignKey:ID_user;references:ID_user" json:"-"`
+	// Связь несущая
+	Tasks []QuantumTask `gorm:"foreignKey:ID_user;references:ID_user" json:"-"`
 }

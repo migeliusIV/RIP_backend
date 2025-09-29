@@ -8,8 +8,8 @@ type Gate struct {
 	Image       *string `gorm:"column:image"`
 
 	// subject area
-	FullInfo string  `gorm:"column:full_info;not null"`
-	TheAxis  *string `gorm:"column:the_axis"`
+	FullInfo string `gorm:"column:full_info;not null"`
+	TheAxis  string `gorm:"column:the_axis"`
 	/*
 		Удалил согласно правкам к ЛР 1
 		IsEditable bool `gorm:"default:false"`
