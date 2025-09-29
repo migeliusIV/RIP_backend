@@ -15,6 +15,6 @@ type Gate struct {
 		IsEditable bool `gorm:"default:false"`
 	*/
 
-	// связи
+	// Несущая связь
 	Degrees []DegreesToGates `gorm:"foreignKey:ID_gate;references:ID_gate"`
 }

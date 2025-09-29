@@ -11,7 +11,7 @@ import (
 func (r *Repository) GetDraftTask(userID uint) (*ds.QuantumTask, error) {
 	var task ds.QuantumTask
 
-	err := r.db.Where("id_user = ? AND tesk_status = ?", userID, ds.StatusDraft).First(&task).Error
+	err := r.db.Where("id_user = ? AND task_status = ?", userID, ds.StatusDraft).First(&task).Error
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +63,9 @@ func (r *Repository) GetTaskWithGates(taskID uint) (*ds.QuantumTask, error) {
 	return &task, nil
 }
 
-// LogicallyDeleteFrax выполняет логическое удаление заявки через чистый SQL UPDATE.
-func (r *Repository) LogicallyDeleteFrax(taskID uint) error {
+// LogicallyDeleteTask выполняет логическое удаление заявки через чистый SQL UPDATE.
+func (r *Repository) LogicallyDeleteTask(taskID uint) error {
 	// Используем Exec для выполнения "сырого" SQL-запроса
-	result := r.db.Exec("UPDATE task SET tesk_status = ? WHERE id_task = ?", ds.StatusDeleted, taskID)
+	result := r.db.Exec("UPDATE quantum_tasks SET task_status = ? WHERE id_task = ?", ds.StatusDeleted, taskID)
 	return result.Error
 }
