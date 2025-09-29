@@ -21,7 +21,7 @@ func (r *Repository) GetGates() ([]ds.Gate, error) {
 
 func (r *Repository) GetGatesByName(title string) ([]ds.Gate, error) {
 	var gates []ds.Gate
-	err := r.db.Where("title ILIKE ?", "%"+title+"%").Find(&gates).Error // добавили условие
+	err := r.db.Where("title ILIKE ?", "%"+title+"%").Find(&gates).Error
 	if err != nil {
 		return nil, err
 	}
