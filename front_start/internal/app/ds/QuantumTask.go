@@ -3,12 +3,12 @@ package ds
 import "time"
 
 type QuantumTask struct {
-	ID_task        uint      `gorm:"column:id_task;primaryKey"`
+	ID_task        uint      `gorm:"column:id_task;primaryKey;autoIncrement"`
 	TaskStatus     string    `gorm:"column:task_status;size:255;not null;default:черновик"`
 	CreationDate   time.Time `gorm:"column:creation_date;not null"`
 	ID_user        uint      `gorm:"column:id_user;not null"`
 	ConclusionDate time.Time `gorm:"column:conclusion_date"`
-	ID_moderator   uint      `gorm:"column:id_moderator"`
+	ID_moderator   *uint     `gorm:"column:id_moderator"`
 
 	TaskDescription string  `gorm:"column:task_description"`
 	Res_koeff_0     float32 `gorm:"column:res_koeff_0;default:1"`

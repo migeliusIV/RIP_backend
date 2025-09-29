@@ -63,7 +63,7 @@ func (h *Handler) GetTask(c *gin.Context) {
 }
 
 func (h *Handler) DeleteTask(c *gin.Context) {
-	taskID, _ := strconv.Atoi(c.Param("id_task"))
+	taskID, _ := strconv.Atoi(c.Param("task_id"))
 
 	if err := h.Repository.LogicallyDeleteTask(uint(taskID)); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)

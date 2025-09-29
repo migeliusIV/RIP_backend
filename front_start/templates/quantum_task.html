@@ -35,7 +35,7 @@
         <div class="task-gates-text">
             <p>Для этого расположите карточки в необходимом порядке и введите углы для операций вращения.</p>
         </div>
-        {{ range .QuantumTask }}
+        {{ range .GatesDegrees }}
             <div class="task-gates-cards">
                 <img src={{ .Gate.Image }} width="70px" height="50px" alt="theme">
                 <div class="task-card-name">
@@ -60,7 +60,7 @@
                 <p>Результат</p>
             </div> 
             <div class="result-field">
-                <input type="text" name="userName" value="{{ .Result }}" class="res-form"/>
+                <input type="text" name="userName" value="{{ .Res_koeff_0 }}|0⟩ + {{ .Res_koeff_1 }}|1⟩" class="res-form"/>
             </div> 
         </div>
 </body>
