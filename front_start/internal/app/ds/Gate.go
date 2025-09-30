@@ -1,7 +1,7 @@
 package ds
 
 type Gate struct {
-	ID_gate     uint    `gorm:"column:id_gate;primaryKey"`
+	ID_gate     uint    `gorm:"column:id_gate;primaryKey;autoIncrement"`
 	Title       string  `gorm:"column:title;size:255;not null;default:gate-no-name;unique"`
 	Description string  `gorm:"column:description;not null"`
 	Status      bool    `gorm:"column:status; default:true"`

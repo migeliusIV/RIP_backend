@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"front_start/internal/app/ds"
+    "time"
 
 	"gorm.io/gorm"
 )
@@ -68,4 +69,90 @@ func (r *Repository) LogicallyDeleteTask(taskID uint) error {
 	// Используем Exec для выполнения "сырого" SQL-запроса
 	result := r.db.Exec("UPDATE quantum_tasks SET task_status = ? WHERE id_task = ?", ds.StatusDeleted, taskID)
 	return result.Error
+}
+
+// ---- JSON task repo ----
+
+func (r *Repository) ListTasks(status, from, to string) ([]ds.QuantumTask, error) {
+    var tasks []ds.QuantumTask
+    q := r.db.Preload("GatesDegrees.Gate").Model(&ds.QuantumTask{})
+    if status != "" {
+        q = q.Where("task_status = ?", status)
+    } else {
+        q = q.Where("task_status NOT IN ?", []string{ds.StatusDeleted, ds.StatusDraft})
+    }
+    if from != "" {
+        q = q.Where("creation_date >= ?", from)
+    }
+    if to != "" {
+        q = q.Where("creation_date <= ?", to)
+    }
+    if err := q.Find(&tasks).Error; err != nil {
+        return nil, err
+    }
+    return tasks, nil
+}
+
+func (r *Repository) UpdateTask(id uint, description string) (*ds.QuantumTask, error) {
+    var task ds.QuantumTask
+    if err := r.db.First(&task, id).Error; err != nil {
+        return nil, err
+    }
+    task.TaskDescription = description
+    if err := r.db.Save(&task).Error; err != nil {
+        return nil, err
+    }
+    return &task, nil
+}
+
+func (r *Repository) FormTask(id uint, formDate time.Time) (*ds.QuantumTask, error) {
+    var task ds.QuantumTask
+    if err := r.db.First(&task, id).Error; err != nil {
+        return nil, err
+    }
+    if task.TaskStatus != ds.StatusDraft {
+        return nil, errors.New("only draft can be formed")
+    }
+    task.TaskStatus = ds.StatusFormed
+    // Here you may set a dedicated form date if it exists; reuse CreationDate otherwise
+    if err := r.db.Save(&task).Error; err != nil {
+        return nil, err
+    }
+    return &task, nil
+}
+
+func (r *Repository) ResolveTask(id uint, moderatorID uint, action string, resolvedAt time.Time) (*ds.QuantumTask, error) {
+    var task ds.QuantumTask
+    if err := r.db.First(&task, id).Error; err != nil {
+        return nil, err
+    }
+    if task.TaskStatus != ds.StatusFormed {
+        return nil, errors.New("only formed can be resolved")
+    }
+    if action == "complete" {
+        task.TaskStatus = ds.StatusCompleted
+    } else if action == "reject" {
+        task.TaskStatus = ds.StatusRejected
+    } else {
+        return nil, errors.New("invalid action")
+    }
+    task.ID_moderator = &moderatorID
+    task.ConclusionDate = resolvedAt
+    if err := r.db.Save(&task).Error; err != nil {
+        return nil, err
+    }
+    return &task, nil
+}
+
+func (r *Repository) DeleteTask(id uint) error {
+    return r.db.Model(&ds.QuantumTask{}).Where("id_task = ?", id).Update("task_status", ds.StatusDeleted).Error
+}
+
+// Helper repos for m-m
+func (r *Repository) RemoveServiceFromTask(taskID, gateID uint) error {
+    return r.db.Where("id_task = ? AND id_gate = ?", taskID, gateID).Delete(&ds.DegreesToGates{}).Error
+}
+
+func (r *Repository) UpdateDegrees(taskID, gateID uint, degrees float32) error {
+    return r.db.Model(&ds.DegreesToGates{}).Where("id_task = ? AND id_gate = ?", taskID, gateID).Update("degrees", degrees).Error
 }

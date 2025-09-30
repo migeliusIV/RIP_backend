@@ -20,3 +20,4 @@ func New(dsn string) (*Repository, error) {
 		db: db,
 	}, nil
 }
+

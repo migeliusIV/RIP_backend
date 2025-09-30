@@ -1,0 +1,77 @@
+package handler
+
+import (
+    "net/http"
+
+    "github.com/gin-gonic/gin"
+)
+
+// simple singleton for demo auth
+var creatorUserID uint = 1
+
+func currentUserID() uint { return creatorUserID }
+
+type registerRequest struct {
+    Login    string `json:"login"`
+    Password string `json:"password"`
+}
+
+type updateUserRequest struct {
+    Password *string `json:"password"`
+}
+
+func (h *Handler) ApiRegister(ctx *gin.Context) {
+    var req registerRequest
+    if err := ctx.ShouldBindJSON(&req); err != nil || req.Login == "" || req.Password == "" {
+        h.errorHandler(ctx, http.StatusBadRequest, err)
+        return
+    }
+    if err := h.Repository.RegisterUser(req.Login, req.Password); err != nil {
+        h.errorHandler(ctx, http.StatusBadRequest, err)
+        return
+    }
+    h.okJSON(ctx, http.StatusCreated, gin.H{"login": req.Login})
+}
+
+func (h *Handler) ApiMe(ctx *gin.Context) {
+    user, err := h.Repository.GetUserByID(currentUserID())
+    if err != nil {
+        h.errorHandler(ctx, http.StatusInternalServerError, err)
+        return
+    }
+    h.okJSON(ctx, http.StatusOK, user)
+}
+
+func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
+    var req updateUserRequest
+    if err := ctx.ShouldBindJSON(&req); err != nil {
+        h.errorHandler(ctx, http.StatusBadRequest, err)
+        return
+    }
+    updated, err := h.Repository.UpdateUser(currentUserID(), req.Password)
+    if err != nil {
+        h.errorHandler(ctx, http.StatusInternalServerError, err)
+        return
+    }
+    h.okJSON(ctx, http.StatusOK, updated)
+}
+
+func (h *Handler) ApiLogin(ctx *gin.Context) {
+    var req registerRequest
+    if err := ctx.ShouldBindJSON(&req); err != nil {
+        h.errorHandler(ctx, http.StatusBadRequest, err)
+        return
+    }
+    // For lab: pretend login success if exists
+    if err := h.Repository.CheckUser(req.Login, req.Password); err != nil {
+        h.errorHandler(ctx, http.StatusBadRequest, err)
+        return
+    }
+    h.okJSON(ctx, http.StatusOK, gin.H{"login": req.Login})
+}
+
+func (h *Handler) ApiLogout(ctx *gin.Context) {
+    h.okJSON(ctx, http.StatusOK, gin.H{"logout": true})
+}
+
+
