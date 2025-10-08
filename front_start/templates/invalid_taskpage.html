@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 — Страница не найдена</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /*===========Common============*/
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      background-image: url('http://127.0.0.1:9000/ibm-pictures/img/background_order.png');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: right bottom;
+      background-color: #F4F4F4;
+      color: #000;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    /*-----------Header-----------*/
+    header {
+      background: rgb(255, 255, 255);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header img {
+      width: 80px;
+      height: 50px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    /*-----------Main Content-----------*/
+    .error-container {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 30px;
+    }
+
+    .error-code {
+      font-size: 100px;
+      font-weight: 600;
+      text-align: center;
+      margin: 20px 0;
+      color: #343a3f; /* rgba(52, 58, 63, 1) */
+    }
+
+    .error-title {
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .error-text {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 40px;
+      color: #6a6a6a;
+      line-height: 1.6;
+    }
+
+    /*--------buttons----------*/
+    .error-button {
+      display: block;
+      width: fit-content;
+      margin: 0 auto;
+      padding: 12px 24px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      background-color: rgba(52, 58, 63, 1);
+      text-decoration: none;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .error-button:hover {
+      background-color: #000000;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      color: white;
+      text-decoration: none;
+    }
+
+    .error-button:focus {
+      outline: 2px solid #000000;
+      outline-offset: 2px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 600px) {
+      .error-code {
+        font-size: 72px;
+      }
+      .error-title {
+        font-size: 24px;
+      }
+      .error-text {
+        font-size: 16px;
+        padding: 0 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="IBM Logo"></a>
+  </header>
+
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Страница потерялась в квантовом пространстве!</h1>
+    <p class="error-text">
+      Похоже, вы попали туда, где даже кубиты не знают дороги обратно.<br>
+      Вернитесь на главную — там всё под контролем.
+    </p>
+    <!--<a href="/" class="error-button">Вернуться на главную</a>-->
+  </div>
+</body>
+</html>

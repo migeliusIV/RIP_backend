@@ -51,7 +51,8 @@ func (h *Handler) GetTask(c *gin.Context) {
 
 	task, err := h.Repository.GetTaskWithGates(uint(taskID))
 	if err != nil {
-		h.errorHandler(c, http.StatusNotFound, err)
+		// Возвращаем кастомную 404-страницу
+		c.HTML(http.StatusNotFound, "invalid_taskpage.html", nil)
 		return
 	}
 
