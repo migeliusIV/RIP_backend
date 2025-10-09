@@ -14,7 +14,7 @@ type Gate struct {
 		Удалил согласно правкам к ЛР 1
 		IsEditable bool `gorm:"default:false"`
 	*/
-
+	
 	// Несущая связь
 	Degrees []DegreesToGates `gorm:"foreignKey:ID_gate;references:ID_gate"`
 }

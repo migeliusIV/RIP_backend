@@ -9,7 +9,8 @@ type QuantumTask struct {
 	ID_user        uint      `gorm:"column:id_user;not null"`
 	ConclusionDate time.Time `gorm:"column:conclusion_date"`
 	ID_moderator   *uint     `gorm:"column:id_moderator"`
-
+	FormedDate     time.Time `gorm:"column:formed_date"`
+	// Задание пользователя
 	TaskDescription string  `gorm:"column:task_description"`
 	Res_koeff_0     float32 `gorm:"column:res_koeff_0;default:1"`
 	Res_koeff_1     float32 `gorm:"column:res_koeff_1;default:0"`
