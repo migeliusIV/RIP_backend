@@ -220,22 +220,13 @@ func (h *Handler) ApiUploadServiceImage(ctx *gin.Context) {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
     }
-    safeName := generateSafeImageName(fileHeader)
-
-    opened, err := fileHeader.Open()
-    if err != nil {
-        h.errorHandler(ctx, http.StatusBadRequest, err)
-        return
-    }
-    defer opened.Close()
-
     // Upload to object storage and update DB atomically at repo level
-    objectPath, err := h.Repository.SaveServiceImage(ctx, uint(id), opened, fileHeader.Size, safeName, fileHeader.Header.Get("Content-Type"))
+    imageURL, err := h.Repository.SaveServiceImage(ctx, uint(id), fileHeader)
     if err != nil {
         h.errorHandler(ctx, http.StatusInternalServerError, err)
         return
     }
-    h.okJSON(ctx, http.StatusCreated, gin.H{"id": id, "image": objectPath})
+    h.okJSON(ctx, http.StatusCreated, gin.H{"id": id, "image": imageURL})
 }
 
 func generateSafeImageName(fh *multipart.FileHeader) string {
