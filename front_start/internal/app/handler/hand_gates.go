@@ -7,6 +7,7 @@ import (
     "path/filepath"
     "regexp"
 	"strconv"
+    "time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -178,8 +179,9 @@ func (h *Handler) ApiAddServiceToDraft(ctx *gin.Context) {
     if err != nil {
         // create
         newTask := ds.QuantumTask{
-            ID_user:    hardcodedUserID,
-            TaskStatus: ds.StatusDraft,
+            ID_user:      hardcodedUserID,
+            TaskStatus:   ds.StatusDraft,
+            CreationDate: time.Now(),
         }
         if createErr := h.Repository.CreateTask(&newTask); createErr != nil {
             h.errorHandler(ctx, http.StatusInternalServerError, createErr)

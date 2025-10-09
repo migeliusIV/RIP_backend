@@ -20,6 +20,10 @@ func (r *Repository) GetDraftTask(userID uint) (*ds.QuantumTask, error) {
 }
 
 func (r *Repository) CreateTask(task *ds.QuantumTask) error {
+	// Set creation date to current time if not already set
+	if task.CreationDate.IsZero() {
+		task.CreationDate = time.Now()
+	}
 	return r.db.Create(task).Error
 }
 
@@ -114,7 +118,7 @@ func (r *Repository) FormTask(id uint, formDate time.Time) (*ds.QuantumTask, err
         return nil, errors.New("only draft can be formed")
     }
     task.TaskStatus = ds.StatusFormed
-    // Here you may set a dedicated form date if it exists; reuse CreationDate otherwise
+    task.FormedDate = formDate
     if err := r.db.Save(&task).Error; err != nil {
         return nil, err
     }

@@ -23,8 +23,9 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 	task, err := h.Repository.GetDraftTask(hardcodedUserID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		newTask := ds.QuantumTask{
-			ID_user:    hardcodedUserID,
-			TaskStatus: ds.StatusDraft,
+			ID_user:      hardcodedUserID,
+			TaskStatus:   ds.StatusDraft,
+			CreationDate: time.Now(),
 		}
 		if createErr := h.Repository.CreateTask(&newTask); createErr != nil {
 			h.errorHandler(c, http.StatusInternalServerError, createErr)
