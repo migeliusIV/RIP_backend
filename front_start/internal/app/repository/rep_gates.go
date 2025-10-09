@@ -3,6 +3,8 @@ package repository
 import (
 	"fmt"
 	"front_start/internal/app/ds"
+    "mime/multipart"
+    "context"
 )
 
 func (r *Repository) GetGates() ([]ds.Gate, error) {
@@ -87,4 +89,16 @@ func (r *Repository) DeleteService(id uint) error {
 
 func (r *Repository) SetServiceImage(id uint, image string) error {
     return r.db.Model(&ds.Gate{}).Where("id_gate = ?", id).Update("image", image).Error
+}
+
+// SaveServiceImage uploads file to MinIO and updates gate image path
+func (r *Repository) SaveServiceImage(ctx context.Context, id uint, file multipart.File, size int64, fileName, contentType string) (string, error) {
+    objectPath, err := r.UploadImage(ctx, file, size, fileName, contentType)
+    if err != nil {
+        return "", err
+    }
+    if err := r.SetServiceImage(id, objectPath); err != nil {
+        return "", err
+    }
+    return objectPath, nil
 }
