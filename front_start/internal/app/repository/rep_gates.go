@@ -49,72 +49,72 @@ func (r *Repository) GetGateByID(id int) (*ds.Gate, error) {
 
 // ---- JSON API helpers for services ----
 
-func (r *Repository) ListServices(title string) ([]ds.Gate, error) {
-    var gates []ds.Gate
-    q := r.db
-    if title != "" {
-        q = q.Where("title ILIKE ?", "%"+title+"%")
-    }
-    if err := q.Find(&gates).Error; err != nil {
-        return nil, err
-    }
-    return gates, nil
+func (r *Repository) ListGates(title string) ([]ds.Gate, error) {
+	var gates []ds.Gate
+	q := r.db
+	if title != "" {
+		q = q.Where("title ILIKE ?", "%"+title+"%")
+	}
+	if err := q.Find(&gates).Error; err != nil {
+		return nil, err
+	}
+	return gates, nil
 }
 
-func (r *Repository) CreateService(g *ds.Gate) error {
-    return r.db.Create(g).Error
+func (r *Repository) AddGate(g *ds.Gate) error {
+	return r.db.Create(g).Error
 }
 
-func (r *Repository) UpdateService(id uint, title, description, fullInfo, theAxis string, status *bool) (*ds.Gate, error) {
-    var gate ds.Gate
-    if err := r.db.First(&gate, id).Error; err != nil {
-        return nil, err
-    }
-    if title != "" {
-        gate.Title = title
-    }
-    if description != "" {
-        gate.Description = description
-    }
-    if fullInfo != "" {
-        gate.FullInfo = fullInfo
-    }
-    if theAxis != "" {
-        gate.TheAxis = theAxis
-    }
-    if status != nil {
-        gate.Status = *status
-    }
-    if err := r.db.Save(&gate).Error; err != nil {
-        return nil, err
-    }
-    return &gate, nil
+func (r *Repository) UpdateGate(id uint, title, description, fullInfo, theAxis string, status *bool) (*ds.Gate, error) {
+	var gate ds.Gate
+	if err := r.db.First(&gate, id).Error; err != nil {
+		return nil, err
+	}
+	if title != "" {
+		gate.Title = title
+	}
+	if description != "" {
+		gate.Description = description
+	}
+	if fullInfo != "" {
+		gate.FullInfo = fullInfo
+	}
+	if theAxis != "" {
+		gate.TheAxis = theAxis
+	}
+	if status != nil {
+		gate.Status = *status
+	}
+	if err := r.db.Save(&gate).Error; err != nil {
+		return nil, err
+	}
+	return &gate, nil
 }
 
-func (r *Repository) DeleteService(id uint) error {
-    return r.db.Transaction(func(tx *gorm.DB) error {
-        // First, get the gate to check if it has an image
-        var gate ds.Gate
-        if err := tx.First(&gate, id).Error; err != nil {
-            return fmt.Errorf("gate with id %d not found: %w", id, err)
-        }
+func (r *Repository) DeleteGate(id uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// First, get the gate to check if it has an image
+		var gate ds.Gate
+		if err := tx.First(&gate, id).Error; err != nil {
+			return fmt.Errorf("gate with id %d not found: %w", id, err)
+		}
 
-        // Remove image from MinIO if exists
-        if gate.Image != nil && *gate.Image != "" {
-            oldImageURL, err := url.Parse(*gate.Image)
-            if err == nil {
-                oldObjectName := strings.TrimPrefix(oldImageURL.Path, fmt.Sprintf("/%s/", r.minio.bucketName))
-                r.minio.client.RemoveObject(context.Background(), r.minio.bucketName, oldObjectName, minio.RemoveObjectOptions{})
-            }
-        }
+		// Remove image from MinIO if exists
+		if gate.Image != nil && *gate.Image != "" {
+			oldImageURL, err := url.Parse(*gate.Image)
+			if err == nil {
+				oldObjectName := strings.TrimPrefix(oldImageURL.Path, fmt.Sprintf("/%s/", r.minio.bucketName))
+				r.minio.client.RemoveObject(context.Background(), r.minio.bucketName, oldObjectName, minio.RemoveObjectOptions{})
+			}
+		}
 
-        // Delete the gate record from database
-        return tx.Delete(&ds.Gate{}, id).Error
-    })
+		// Delete the gate record from database
+		return tx.Delete(&ds.Gate{}, id).Error
+	})
 }
 
 func (r *Repository) SetServiceImage(id uint, image string) error {
-    return r.db.Model(&ds.Gate{}).Where("id_gate = ?", id).Update("image", image).Error
+	return r.db.Model(&ds.Gate{}).Where("id_gate = ?", id).Update("image", image).Error
 }
 
 // SaveServiceImage uploads file to MinIO and updates gate image path with transaction and old image cleanup
