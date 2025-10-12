@@ -65,8 +65,12 @@ func (h *Handler) GetTask(c *gin.Context) {
 		h.errorHandler(c, http.StatusForbidden, errors.New("cannot access an empty frax page, add factors first"))
 		return
 	}
-
-	c.HTML(http.StatusOK, "quantum_task.html", task)
+	
+	var taskRepresent ds.QuantumTask
+	taskRepresent = *task  // разыменовываем указатель
+	taskRepresent.Res_koeff_0 = task.Res_koeff_0 * task.Res_koeff_0  // квадрат первого коэффициента
+	taskRepresent.Res_koeff_1 = task.Res_koeff_1 * task.Res_koeff_1  // квадрат второго коэффициента
+	c.HTML(http.StatusOK, "quantum_task.html", taskRepresent)
 }
 
 func (h *Handler) DeleteTask(c *gin.Context) {
@@ -200,7 +204,9 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 		
 		// Проверяем, что у всех гейтов указаны градусы
 		for _, gateDegree := range task.GatesDegrees {
-			if gateDegree.Degrees == nil {
+			var currGate = gateDegree.Gate
+
+			if gateDegree.Degrees == nil && currGate.TheAxis != "non"{
 				h.errorHandler(ctx, http.StatusBadRequest, 
 					fmt.Errorf("degrees not specified for gate %s (ID: %d)", 
 						gateDegree.Gate.Title, gateDegree.Gate.ID_gate))

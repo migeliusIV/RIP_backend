@@ -27,13 +27,8 @@ func (r *Repository) GetResByGate(gate ds.Gate, degree float32, koeff_0, koeff_1
 		// k0' = k0*cos(θ/2) - i*k1*sin(θ/2) -> действительная часть: k0*cos(θ/2)
 		// k1' = -i*k0*sin(θ/2) + k1*cos(θ/2) -> действительная часть: k1*cos(θ/2)
 		// Но для правильного результата нужно учесть, что мнимая часть "переходит" в вещественную
-		if (k0 > k1) {
-			newK0 = k0*cosHalf - k1*sinHalf  // k0*cos(θ/2) - k1*sin(θ/2)
-			newK1 = 1 - newK0  				 
-		} else {
-			newK1 = k0*sinHalf + k1*cosHalf  // k0*sin(θ/2) + k1*cos(θ/2)
-			newK0 = 1 - newK1  				
-		}
+		newK0 = k0*cosHalf - k1*sinHalf  // k0*cos(θ/2) - k1*sin(θ/2)
+		newK1 = k0*sinHalf + k1*cosHalf		 
 		
 	
 	case "Y":
@@ -42,14 +37,9 @@ func (r *Repository) GetResByGate(gate ds.Gate, degree float32, koeff_0, koeff_1
 		sinHalf := -math.Sin(deg / 2)
 		
 		// Применяем матрицу вращения к вектору [k0, k1]
-		if (k0 > k1) {
-			newK0 = k0*cosHalf - k1*sinHalf  // k0*cos(θ/2) - k1*sin(θ/2)
-			newK1 = 1 - newK0  
-		} else {
-			newK1 = k0*sinHalf + k1*cosHalf	// k0*sin(θ/2) + k1*cos(θ/2)
-			newK0 = 1 - newK1
-		}
-	
+		newK0 = k0*cosHalf - k1*sinHalf  // k0*cos(θ/2) - k1*sin(θ/2)
+		newK1 = k0*sinHalf + k1*cosHalf	// k0*sin(θ/2) + k1*cos(θ/2)
+
 	case "Z":
 		// Z-вращение: R_z(θ) = [[e^(-iθ/2), 0], [0, e^(iθ/2)]]
 		// Для вещественных коэффициентов k0, k1:
@@ -60,19 +50,20 @@ func (r *Repository) GetResByGate(gate ds.Gate, degree float32, koeff_0, koeff_1
 		// k0' = k0 * e^(-iθ/2) = k0 * (cos(θ/2) - i*sin(θ/2))
 		// k1' = k1 * e^(iθ/2) = k1 * (cos(θ/2) + i*sin(θ/2))
 		// Для вещественных коэффициентов берем только действительные части
-		if (k0 > k1) {
-			newK0 = k0 * cosHalf  // k0*cos(θ/2)
-			newK1 = 1 - newK0 
-		} else {
-			newK1 = k1 * cosHalf  // k1*cos(θ/2)
-			newK0 = 1 - newK1  
-		}
+		newK0 = k0 * cosHalf  // k0*cos(θ/2)
+		newK1 = k1 * cosHalf  // k1*cos(θ/2)
 		
 		
 	default:
-		// Для гейтов без оси (например, H, I) возвращаем исходные коэффициенты
-		newK0 = k0
-		newK1 = k1
+		// Для гейтов без оси (например, H, I) используем матричные коэффициенты
+		if gate.I0j0 != nil && gate.I0j1 != nil && gate.I1j0 != nil && gate.I1j1 != nil && gate.Matrix_koeff != nil {
+			newK0 = float64(*gate.Matrix_koeff) * (k0 * float64(*gate.I0j0) + k1 * float64(*gate.I0j1))
+			newK1 = float64(*gate.Matrix_koeff) * (k0 * float64(*gate.I1j0) + k1 * float64(*gate.I1j1))
+		} else {
+			// Если матричные коэффициенты не заданы, возвращаем исходные коэффициенты
+			newK0 = k0
+			newK1 = k1
+		}
 	}
 
 	// Обновляем коэффициенты
@@ -106,14 +97,15 @@ func (r *Repository) GetQTaskRes(taskID uint) error {
 
 	// Обходим все гейты в задаче и применяем их по очереди
 	for _, gateDegree := range task.GatesDegrees {
+		var degree float32
 		// Проверяем, что у гейта указан угол поворота
 		if gateDegree.Degrees == nil {
-			return fmt.Errorf("degrees not specified for gate %s (ID: %d)", 
-				gateDegree.Gate.Title, gateDegree.Gate.ID_gate)
+			degree = 0
+		} else {
+			degree = *gateDegree.Degrees
 		}
-
 		// Применяем гейт к текущим коэффициентам
-		err := r.GetResByGate(gateDegree.Gate, *gateDegree.Degrees, &resKoeff0, &resKoeff1)
+		err := r.GetResByGate(gateDegree.Gate, degree, &resKoeff0, &resKoeff1)
 		if err != nil {
 			return fmt.Errorf("failed to apply gate %s: %v", gateDegree.Gate.Title, err)
 		}

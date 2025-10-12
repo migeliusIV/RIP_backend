@@ -6,12 +6,11 @@ type Gate struct {
 	Description string  `gorm:"column:description;not null"`
 	Status      bool    `gorm:"column:status; default:true"`
 	Image       *string `gorm:"column:image"`
-	/*
-	i0j0 		*float32 `gorm:"column:i0_j0"`
-	i0j1 		*float32 `gorm:"column:i0_j1"`
-	i1j0 		*float32 `gorm:"column:i1_j0"`
-	i1j1 		*float32 `gorm:"column:i1_j1"`
-*/
+	I0j0 		*int 	`gorm:"column:i0_j0"`
+	I0j1 		*int 	`gorm:"column:i0_j1"`
+	I1j0 		*int 	`gorm:"column:i1_j0"`
+	I1j1 		*int 	`gorm:"column:i1_j1"`
+	Matrix_koeff *float32 `gorm:"column:matrix_koeff"`
 	// subject area
 	FullInfo string `gorm:"column:full_info;not null"`
 	TheAxis  string `gorm:"column:the_axis"`
