@@ -2,12 +2,14 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"front_start/internal/app/ds"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +28,8 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 			ID_user:      hardcodedUserID,
 			TaskStatus:   ds.StatusDraft,
 			CreationDate: time.Now(),
+			Res_koeff_0:  1.0,  // Начальное значение для |0⟩
+			Res_koeff_1:  0.0,  // Начальное значение для |1⟩
 		}
 		if createErr := h.Repository.CreateTask(&newTask); createErr != nil {
 			h.errorHandler(c, http.StatusInternalServerError, createErr)
@@ -148,19 +152,82 @@ type resolveRequest struct {
 func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
+		logrus.Errorf("Invalid task ID in resolve request: %v", err)
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
+	
+	logrus.Infof("Processing resolve request for task ID: %d", id)
+	
 	var req resolveRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		// Более детальная обработка ошибки JSON
+		logrus.Errorf("JSON binding error for task %d: %v", id, err)
+		if err.Error() == "EOF" {
+			h.errorHandler(ctx, http.StatusBadRequest, errors.New("request body is empty, expected JSON with 'action' field"))
+		} else {
+			h.errorHandler(ctx, http.StatusBadRequest, fmt.Errorf("invalid JSON format: %v", err))
+		}
 		return
 	}
+	
+	// Проверяем, что action указан
+	if req.Action == "" {
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("action field is required"))
+		return
+	}
+	
+	// Проверяем, что action имеет допустимое значение
+	if req.Action != "complete" && req.Action != "reject" {
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("action must be 'complete' or 'reject'"))
+		return
+	}
+	
+	// Если задача завершается, вычисляем результат
+	if req.Action == "complete" {
+		// Проверяем, что у задачи есть все необходимые параметры для вычисления результата
+		task, err := h.Repository.GetTaskWithGates(uint(id))
+		if err != nil {
+			h.errorHandler(ctx, http.StatusNotFound, err)
+			return
+		}
+		
+		// Проверяем наличие описания задачи
+		if task.TaskDescription == "" {
+			h.errorHandler(ctx, http.StatusBadRequest, errors.New("task description is required for completion"))
+			return
+		}
+		
+		// Проверяем, что у всех гейтов указаны градусы
+		for _, gateDegree := range task.GatesDegrees {
+			if gateDegree.Degrees == nil {
+				h.errorHandler(ctx, http.StatusBadRequest, 
+					fmt.Errorf("degrees not specified for gate %s (ID: %d)", 
+						gateDegree.Gate.Title, gateDegree.Gate.ID_gate))
+				return
+			}
+		}
+		
+		// Вычисляем результат квантовой задачи
+		logrus.Infof("Calculating result for task %d", id)
+		err = h.Repository.GetQTaskRes(uint(id))
+		if err != nil {
+			logrus.Errorf("Failed to calculate result for task %d: %v", id, err)
+			h.errorHandler(ctx, http.StatusInternalServerError, 
+				fmt.Errorf("failed to calculate task result: %v", err))
+			return
+		}
+		logrus.Infof("Successfully calculated result for task %d", id)
+	}
+	
 	resolved, err := h.Repository.ResolveTask(uint(id), hardcodedUserID, req.Action, time.Now())
 	if err != nil {
+		logrus.Errorf("Failed to resolve task %d: %v", id, err)
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
+	
+	logrus.Infof("Successfully resolved task %d with action: %s", id, req.Action)
 	h.okJSON(ctx, http.StatusOK, resolved)
 }
 
