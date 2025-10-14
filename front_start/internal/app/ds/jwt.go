@@ -4,6 +4,6 @@ import "github.com/golang-jwt/jwt/v5"
 
 type JWTClaims struct {
 	jwt.RegisteredClaims
-	UserID      uint `json:"user_id"`
-	IsModerator bool `json:"is_moderator"`
+	UserID      uint `json:"id_user"`
+	IsModerator bool `json:"is_admin"`
 }

@@ -171,11 +171,16 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		return
 	}
 	// Reuse HTML flow: get or create draft, then add gate to task
-	task, err := h.Repository.GetDraftTask(hardcodedUserID)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	task, err := h.Repository.GetDraftTask(userID)
 	if err != nil {
 		// create
 		newTask := ds.QuantumTask{
-			ID_user:      hardcodedUserID,
+			ID_user:      userID,
 			TaskStatus:   ds.StatusDraft,
 			CreationDate: time.Now(),
 		}
@@ -185,7 +190,7 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		}
 		task = &newTask
 	}
-	if err := h.Repository.AddGateToTask(task.ID_task, uint(id)); err != nil {
+	if err := h.Repository.AddGateToTask(userID, uint(factorID)); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}

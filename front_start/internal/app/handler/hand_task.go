@@ -22,10 +22,16 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.Repository.GetDraftTask(hardcodedUserID)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	task, err := h.Repository.GetDraftTask(userID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		newTask := ds.QuantumTask{
-			ID_user:      hardcodedUserID,
+			ID_user:      userID,
 			TaskStatus:   ds.StatusDraft,
 			CreationDate: time.Now(),
 			Res_koeff_0:  1.0,  // Начальное значение для |0⟩
@@ -222,7 +228,13 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 		logrus.Infof("Successfully calculated result for task %d", id)
 	}
 	
-	resolved, err := h.Repository.ResolveTask(uint(id), hardcodedUserID, req.Action, time.Now())
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	adminID := uint(userID)
+	resolved, err := h.Repository.ResolveTask(uint(id), adminID, req.Action, time.Now())
 	if err != nil {
 		logrus.Errorf("Failed to resolve task %d: %v", id, err)
 		h.errorHandler(ctx, http.StatusBadRequest, err)
