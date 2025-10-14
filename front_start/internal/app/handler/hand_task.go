@@ -86,9 +86,7 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 
 // ---- JSON API for tasks ----
 
-type taskUpdateRequest struct {
-	TaskDescription string `json:"task_description"`
-}
+// moved to serialization.go
 
 func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 	status := ctx.Query("status")
@@ -99,7 +97,7 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"items": tasks})
+    h.okJSON(ctx, http.StatusOK, DTO_TasksListResponse{Items: tasks})
 }
 
 func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
@@ -122,7 +120,7 @@ func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	var req taskUpdateRequest
+    var req DTO_taskUpdateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -149,9 +147,7 @@ func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 	h.okJSON(ctx, http.StatusOK, formed)
 }
 
-type resolveRequest struct {
-	Action string `json:"action"` // "complete" | "reject"
-}
+// moved to serialization.go
 
 func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
@@ -163,7 +159,7 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	
 	logrus.Infof("Processing resolve request for task ID: %d", id)
 	
-	var req resolveRequest
+    var req DTO_resolveRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Более детальная обработка ошибки JSON
 		logrus.Errorf("JSON binding error for task %d: %v", id, err)
@@ -247,13 +243,11 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"id": id})
+    h.okJSON(ctx, http.StatusOK, DTO_SimpleIDResponse{ID: id})
 }
 
 // ---- JSON API for m-m ----
-type updateDegreesRequest struct {
-	Degrees *float32 `json:"degrees"`
-}
+// moved to serialization.go
 
 func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 	taskID, err1 := strconv.Atoi(ctx.Param("task_id"))
@@ -266,7 +260,7 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"task_id": taskID, "service_id": gateID})
+    h.okJSON(ctx, http.StatusOK, DTO_TaskServiceLinkResponse{TaskID: uint(taskID), ServiceID: gateID})
 }
 
 func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
@@ -276,7 +270,7 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid ids"))
 		return
 	}
-	var req updateDegreesRequest
+    var req DTO_updateDegreesRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil || req.Degrees == nil {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("degrees required"))
 		return
@@ -285,5 +279,5 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"task_id": taskID, "service_id": gateID, "degrees": req.Degrees})
+    h.okJSON(ctx, http.StatusOK, DTO_UpdateDegreesResponse{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
 }

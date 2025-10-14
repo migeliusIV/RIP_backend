@@ -78,13 +78,7 @@ func (h *Handler) GetGateByID(ctx *gin.Context) {
 
 // ---- JSON API (services/gates) ----
 
-type serviceCreateRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	FullInfo    string `json:"full_info"`
-	TheAxis     string `json:"the_axis"`
-	Status      *bool  `json:"status"`
-}
+// moved to serialization.go
 
 func (h *Handler) ApiGatesList(ctx *gin.Context) {
 	title := ctx.Query("title")
@@ -93,7 +87,7 @@ func (h *Handler) ApiGatesList(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"items": gates})
+    h.okJSON(ctx, http.StatusOK, DTO_GatesListResponse{Items: gates})
 }
 
 func (h *Handler) ApiGetGateByID(ctx *gin.Context) {
@@ -111,7 +105,7 @@ func (h *Handler) ApiGetGateByID(ctx *gin.Context) {
 }
 
 func (h *Handler) ApiAddGate(ctx *gin.Context) {
-	var req serviceCreateRequest
+    var req DTO_serviceCreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -142,7 +136,7 @@ func (h *Handler) ApiUpdateGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	var req serviceCreateRequest
+    var req DTO_serviceCreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -167,7 +161,7 @@ func (h *Handler) ApiDeleteGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"id": id})
+    h.okJSON(ctx, http.StatusOK, DTO_SimpleIDResponse{ID: id})
 }
 
 func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
@@ -195,7 +189,7 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, gin.H{"task_id": task.ID_task, "service_id": id})
+    h.okJSON(ctx, http.StatusCreated, DTO_TaskServiceLinkResponse{TaskID: task.ID_task, ServiceID: id})
 }
 
 func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
@@ -209,7 +203,7 @@ func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
 			gatesCount = len(fullTask.GatesDegrees)
 		}
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"task_id": taskID, "services_count": gatesCount})
+    h.okJSON(ctx, http.StatusOK, DTO_CurrTaskInfoResponse{TaskID: taskID, ServicesCount: gatesCount})
 }
 
 // ApiUploadServiceImage: accepts multipart form with field "file", sets image name
@@ -230,7 +224,7 @@ func (h *Handler) ApiUploadGatesImage(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, gin.H{"id": id, "image": imageURL})
+    h.okJSON(ctx, http.StatusCreated, DTO_UploadImageResponse{ID: id, Image: imageURL})
 }
 
 func generateSafeImageName(fh *multipart.FileHeader) string {

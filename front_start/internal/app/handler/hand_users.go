@@ -2,6 +2,7 @@ package handler
 
 import (
     "net/http"
+    "front_start/internal/app/ds"
 
     "github.com/gin-gonic/gin"
 )
@@ -11,17 +12,12 @@ var creatorUserID uint = 1
 
 func currentUserID() uint { return creatorUserID }
 
-type registerRequest struct {
-    Login    string `json:"login"`
-    Password string `json:"password"`
-}
+// moved to serialization.go
 
-type updateUserRequest struct {
-    Password *string `json:"password"`
-}
+// moved to serialization.go
 
 func (h *Handler) ApiRegister(ctx *gin.Context) {
-    var req registerRequest
+    var req DTO_registerRequest
     if err := ctx.ShouldBindJSON(&req); err != nil || req.Login == "" || req.Password == "" {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
@@ -30,7 +26,7 @@ func (h *Handler) ApiRegister(ctx *gin.Context) {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
     }
-    h.okJSON(ctx, http.StatusCreated, gin.H{"login": req.Login})
+    h.okJSON(ctx, http.StatusCreated, DTO_RegisterResponse{Login: req.Login})
 }
 
 func (h *Handler) ApiMe(ctx *gin.Context) {
@@ -39,11 +35,11 @@ func (h *Handler) ApiMe(ctx *gin.Context) {
         h.errorHandler(ctx, http.StatusInternalServerError, err)
         return
     }
-    h.okJSON(ctx, http.StatusOK, user)
+    h.okJSON(ctx, http.StatusOK, ds.ToUserPublic(user))
 }
 
 func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
-    var req updateUserRequest
+    var req DTO_updateUserRequest
     if err := ctx.ShouldBindJSON(&req); err != nil {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
@@ -53,11 +49,11 @@ func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
         h.errorHandler(ctx, http.StatusInternalServerError, err)
         return
     }
-    h.okJSON(ctx, http.StatusOK, updated)
+    h.okJSON(ctx, http.StatusOK, ds.ToUserPublic(updated))
 }
 
 func (h *Handler) ApiLogin(ctx *gin.Context) {
-    var req registerRequest
+    var req DTO_registerRequest
     if err := ctx.ShouldBindJSON(&req); err != nil {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
@@ -67,11 +63,11 @@ func (h *Handler) ApiLogin(ctx *gin.Context) {
         h.errorHandler(ctx, http.StatusBadRequest, err)
         return
     }
-    h.okJSON(ctx, http.StatusOK, gin.H{"login": req.Login})
+    h.okJSON(ctx, http.StatusOK, DTO_LoginResponse{Login: req.Login})
 }
 
 func (h *Handler) ApiLogout(ctx *gin.Context) {
-    h.okJSON(ctx, http.StatusOK, gin.H{"logout": true})
+    h.okJSON(ctx, http.StatusOK, DTO_LogoutResponse{Logout: true})
 }
 
 
