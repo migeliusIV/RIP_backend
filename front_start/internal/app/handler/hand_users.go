@@ -19,14 +19,14 @@ func currentUserID() uint { return creatorUserID }
 // Register регистрирует нового пользователя
 // @Summary Регистрация пользователя
 // @Description Создает нового пользователя с указанными логином и паролем
-// @Tags Auth
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param request body DTO_Req_UserReg true "Данные для регистрации"
 // @Success 200 {object} DTO_Resp_User "Зарегистрированный пользователь"
 // @Failure 400 {object} string "Invalid input data"
 // @Failure 500 {object} string "Internal server error"
-// @Router /auth/register [post]
+// @Router /users [post]
 func (h *Handler) Register(ctx *gin.Context) {
     var req DTO_Req_UserReg
     if err := ctx.ShouldBindJSON(&req); err != nil || req.Login == "" || req.Password == "" {
@@ -50,7 +50,7 @@ func (h *Handler) Register(ctx *gin.Context) {
 // Login выполняет аутентификацию пользователя
 // @Summary Аутентификация пользователя
 // @Description Выполняет вход пользователя и возвращает JWT токен
-// @Tags Auth
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param request body DTO_Req_UserReg true "Учетные данные"
@@ -58,7 +58,7 @@ func (h *Handler) Register(ctx *gin.Context) {
 // @Failure 400 {object} string "Invalid input data"
 // @Failure 401 {object} string "Invalid credentials"
 // @Failure 500 {object} string "Internal server error"
-// @Router /auth/login [post]
+// @Router /login [post]
 func (h *Handler) Login(ctx *gin.Context) {
 	var req DTO_Req_UserReg
 	if err := ctx.BindJSON(&req); err != nil {
@@ -116,7 +116,7 @@ func (h *Handler) Login(ctx *gin.Context) {
 // @Success 200 {object} DTO_Resp_User "Данные пользователя"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/me [get]
+// @Router /api/users/me [get]
 func (h *Handler) ApiMe(ctx *gin.Context) {
     user, err := h.Repository.GetUserByID(currentUserID())
     if err != nil {
@@ -138,7 +138,7 @@ func (h *Handler) ApiMe(ctx *gin.Context) {
 // @Failure 400 {object} string "Invalid input data"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/me [put]
+// @Router /api/users/me [put]
 func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
     var req DTO_Req_UserUpd
     if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -156,14 +156,14 @@ func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
 // Logout выполняет выход пользователя
 // @Summary Выход из системы
 // @Description Добавляет JWT токен в черный список и выполняет деавторизацию
-// @Tags Auth
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} object "Сообщение об успешном выходе" {"message": "Деавторизация прошла успешно"}
 // @Failure 400 {object} string "Invalid authorization header"
 // @Failure 500 {object} string "Internal server error"
-// @Router /auth/logout [post]
+// @Router /api/auth/logout [post]
 func (h *Handler) Logout(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {

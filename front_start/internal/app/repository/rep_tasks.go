@@ -77,8 +77,9 @@ func (r *Repository) LogicallyDeleteTask(taskID uint) error {
 
 // ---- JSON task repo ----
 
-func (r *Repository) ListTasks(status, from, to string) ([]ds.QuantumTask, error) {
-	var tasks []ds.QuantumTask
+// В репозитории сделайте оба метода возвращать один тип
+func (r *Repository) ListTasks(status, from, to string) ([]*ds.QuantumTask, error) {
+	var tasks []*ds.QuantumTask
 	q := r.db.Preload("GatesDegrees.Gate").Model(&ds.QuantumTask{})
 	if status != "" {
 		q = q.Where("task_status = ?", status)
@@ -94,6 +95,30 @@ func (r *Repository) ListTasks(status, from, to string) ([]ds.QuantumTask, error
 	if err := q.Find(&tasks).Error; err != nil {
 		return nil, err
 	}
+	return tasks, nil
+}
+
+func (r *Repository) ListTasksByUser(userID uint, status, from, to string) ([]*ds.QuantumTask, error) {
+	var tasks []*ds.QuantumTask
+	// Включим логирование SQL
+	//r.db = r.db.Debug()
+	query := r.db.Preload("GatesDegrees.Gate").Where("id_user = ?", userID)
+
+	if status != "" {
+		query = query.Where("task_status = ?", status)
+	} else {
+		query = query.Where("task_status NOT IN ?", []string{ds.StatusDeleted, ds.StatusDraft})
+	} if from != "" {
+		query = query.Where("creation_date >= ?", from)
+	} if to != "" {
+		query = query.Where("creation_date <= ?", to)
+	}
+
+	err := query.Order("creation_date DESC").Find(&tasks).Error
+	if err != nil {
+		return nil, err
+	}
+
 	return tasks, nil
 }
 

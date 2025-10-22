@@ -40,25 +40,12 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @Summary Health check
-// @Description Проверка работоспособности API
-// @Tags System
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]string
-// @Router /health [get]
-func healthCheck(c *gin.Context) {
-    c.JSON(200, gin.H{"status": "ok"})
-}
 
 func main() {
 	router := gin.Default()
 	
 	// Добавляем Swagger UI маршрут ДО инициализации приложения
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	
-	// Health check маршрут
-	router.GET("/health", healthCheck)
 
 	conf, err := config.NewConfig()
 	if err != nil {

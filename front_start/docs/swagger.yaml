@@ -368,6 +368,69 @@ info:
   title: Quantum Tasks API
   version: "1.0"
 paths:
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет JWT токен в черный список и выполняет деавторизацию
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Сообщение об успешном выходе" {"message": "Деавторизация прошла
+            успешно"}'
+          schema:
+            type: object
+        "400":
+          description: Invalid authorization header
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Выход из системы
+      tags:
+      - Users
+  /api/draft/gates/{id}:
+    post:
+      description: Добавляет указанный гейт в текущую черновую задачу пользователя.
+      parameters:
+      - description: ID гейта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink'
+        "400":
+          description: Некорректный ID гейта
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Требуется авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при добавлении гейта в задачу
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Добавить гейт в черновик задачи
+      tags:
+      - Gates
   /api/gates:
     get:
       description: Возвращает список всех гейтов. Поддерживает фильтрацию по названию.
@@ -393,7 +456,7 @@ paths:
             type: object
       summary: Получить список гейтов
       tags:
-      - gates
+      - Gates
     post:
       consumes:
       - application/json
@@ -426,7 +489,7 @@ paths:
             type: object
       summary: Создать новый гейт
       tags:
-      - gates
+      - Gates
   /api/gates/{id}:
     delete:
       description: Удаляет гейт по ID.
@@ -457,7 +520,7 @@ paths:
             type: object
       summary: Удалить гейт
       tags:
-      - gates
+      - Gates
     get:
       description: Возвращает полную информацию о гейте по его идентификатору.
       parameters:
@@ -493,7 +556,7 @@ paths:
             type: object
       summary: Получить гейт по ID
       tags:
-      - gates
+      - Gates
     put:
       consumes:
       - application/json
@@ -531,7 +594,7 @@ paths:
             type: object
       summary: Обновить гейт
       tags:
-      - gates
+      - Gates
   /api/gates/{id}/image:
     post:
       consumes:
@@ -569,8 +632,306 @@ paths:
             type: object
       summary: Загрузить изображение для гейта
       tags:
-      - gates
-  /api/me:
+      - Gates
+  /api/quantum_task/current:
+    get:
+      description: Возвращает ID текущей черновой задачи и количество добавленных
+        в неё гейтов.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_CurrTaskInfo'
+        "500":
+          description: Ошибка при получении данных задачи
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить информацию о текущей черновой задаче
+      tags:
+      - QuantumTasks
+  /api/quantum_tasks:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список квантовых задач. Пользователь видит только свои
+        задачи, модератор - все задачи, неавторизованный пользователь - ошибку доступа.
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      - description: Начальная дата (фильтр от)
+        in: query
+        name: from
+        type: string
+      - description: Конечная дата (фильтр до)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список задач
+          schema:
+            items:
+              $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список задач
+      tags:
+      - QuantumTasks
+  /api/quantum_tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Полностью удаляет квантовую задачу из системы
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удаленной задачи
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_SimpleID'
+        "400":
+          description: Invalid task ID
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Удалить задачу
+      tags:
+      - QuantumTasks
+    get:
+      consumes:
+      - application/json
+      description: Возвращает детальную информацию о квантовой задаче по её идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Детали задачи
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
+        "400":
+          description: Invalid task ID
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      summary: Получить задачу по ID
+      tags:
+      - QuantumTasks
+    put:
+      consumes:
+      - application/json
+      description: Обновляет описание квантовой задачи
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_app_handler.DTO_Req_TaskUpd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная задача
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Обновить задачу
+      tags:
+      - QuantumTasks
+  /api/quantum_tasks/{id}/form:
+    put:
+      consumes:
+      - application/json
+      description: Переводит задачу из статуса черновика в статус сформированной
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Сформированная задача
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
+        "400":
+          description: Invalid task ID or cannot form task
+          schema:
+            type: string
+      summary: Сформировать задачу
+      tags:
+      - QuantumTasks
+  /api/quantum_tasks/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Выполняет завершение или отклонение квантовой задачи с вычислением
+        результата
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Действие с задачей
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_app_handler.DTO_Req_TaskResolve'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Решенная задача
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
+        "400":
+          description: Invalid input or missing required fields
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Завершить/отклонить задачу
+      tags:
+      - QuantumTasks
+  /api/tasks/{task_id}/services/{service_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет связь между гейтом и задачей
+      parameters:
+      - description: ID задачи
+        in: path
+        name: task_id
+        required: true
+        type: integer
+      - description: ID гейта
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация об удаленной связи
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink'
+        "400":
+          description: Invalid IDs
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Удалить гейт из задачи
+      tags:
+      - M-M
+    put:
+      consumes:
+      - application/json
+      description: Обновляет значение градусов для конкретного гейта в задаче
+      parameters:
+      - description: ID задачи
+        in: path
+        name: task_id
+        required: true
+        type: integer
+      - description: ID гейта
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Новые значения градусов
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_app_handler.DTO_Req_DegreesUpd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные
+          schema:
+            $ref: '#/definitions/internal_app_handler.DTO_Resp_UpdateDegrees'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Обновить градусы гейта
+      tags:
+      - M-M
+  /api/users/me:
     get:
       consumes:
       - application/json
@@ -630,333 +991,7 @@ paths:
       summary: Обновить данные пользователя
       tags:
       - Users
-  /api/tasks:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает список квантовых задач с возможностью фильтрации по
-        статусу и датам
-      parameters:
-      - description: Фильтр по статусу
-        in: query
-        name: status
-        type: string
-      - description: Начальная дата (фильтр от)
-        in: query
-        name: from
-        type: string
-      - description: Конечная дата (фильтр до)
-        in: query
-        name: to
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Список задач
-          schema:
-            items:
-              $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
-            type: array
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Получить список задач
-      tags:
-      - Tasks API
-  /api/tasks/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Полностью удаляет квантовую задачу из системы
-      parameters:
-      - description: ID задачи
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ID удаленной задачи
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_SimpleID'
-        "400":
-          description: Invalid task ID
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Удалить задачу
-      tags:
-      - Tasks API
-    get:
-      consumes:
-      - application/json
-      description: Возвращает детальную информацию о квантовой задаче по её идентификатору
-      parameters:
-      - description: ID задачи
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Детали задачи
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
-        "400":
-          description: Invalid task ID
-          schema:
-            type: string
-        "404":
-          description: Task not found
-          schema:
-            type: string
-      summary: Получить задачу по ID
-      tags:
-      - Tasks API
-    put:
-      consumes:
-      - application/json
-      description: Обновляет описание квантовой задачи
-      parameters:
-      - description: ID задачи
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Данные для обновления
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_app_handler.DTO_Req_TaskUpd'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновленная задача
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
-        "400":
-          description: Invalid input
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Обновить задачу
-      tags:
-      - Tasks API
-  /api/tasks/{id}/form:
-    post:
-      consumes:
-      - application/json
-      description: Переводит задачу из статуса черновика в статус сформированной
-      parameters:
-      - description: ID задачи
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Сформированная задача
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
-        "400":
-          description: Invalid task ID or cannot form task
-          schema:
-            type: string
-      summary: Сформировать задачу
-      tags:
-      - Tasks API
-  /api/tasks/{id}/resolve:
-    post:
-      consumes:
-      - application/json
-      description: Выполняет завершение или отклонение квантовой задачи с вычислением
-        результата
-      parameters:
-      - description: ID задачи
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Действие с задачей
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_app_handler.DTO_Req_TaskResolve'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Решенная задача
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_Tasks'
-        "400":
-          description: Invalid input or missing required fields
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Task not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Завершить/отклонить задачу
-      tags:
-      - Tasks API
-  /api/tasks/{task_id}/gates/{service_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Удаляет связь между гейтом и задачей
-      parameters:
-      - description: ID задачи
-        in: path
-        name: task_id
-        required: true
-        type: integer
-      - description: ID гейта
-        in: path
-        name: service_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация об удаленной связи
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink'
-        "400":
-          description: Invalid IDs
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Удалить гейт из задачи
-      tags:
-      - Task-Gate Relations
-  /api/tasks/{task_id}/gates/{service_id}/degrees:
-    put:
-      consumes:
-      - application/json
-      description: Обновляет значение градусов для конкретного гейта в задаче
-      parameters:
-      - description: ID задачи
-        in: path
-        name: task_id
-        required: true
-        type: integer
-      - description: ID гейта
-        in: path
-        name: service_id
-        required: true
-        type: integer
-      - description: Новые значения градусов
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_app_handler.DTO_Req_DegreesUpd'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновленные данные
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_UpdateDegrees'
-        "400":
-          description: Invalid input
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Обновить градусы гейта
-      tags:
-      - Task-Gate Relations
-  /api/tasks/draft:
-    get:
-      description: Возвращает ID текущей черновой задачи и количество добавленных
-        в неё гейтов.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_CurrTaskInfo'
-        "500":
-          description: Ошибка при получении данных задачи
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Получить информацию о текущей черновой задаче
-      tags:
-      - tasks
-  /api/tasks/draft/gate/{id}:
-    post:
-      description: Добавляет указанный гейт в текущую черновую задачу пользователя.
-      parameters:
-      - description: ID гейта
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink'
-        "400":
-          description: Некорректный ID гейта
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Требуется авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Ошибка при добавлении гейта в задачу
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Добавить гейт в черновик задачи
-      tags:
-      - tasks
-  /auth/login:
+  /login:
     post:
       consumes:
       - application/json
@@ -989,34 +1024,8 @@ paths:
             type: string
       summary: Аутентификация пользователя
       tags:
-      - Auth
-  /auth/logout:
-    post:
-      consumes:
-      - application/json
-      description: Добавляет JWT токен в черный список и выполняет деавторизацию
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 'Сообщение об успешном выходе" {"message": "Деавторизация прошла
-            успешно"}'
-          schema:
-            type: object
-        "400":
-          description: Invalid authorization header
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Выход из системы
-      tags:
-      - Auth
-  /auth/register:
+      - Users
+  /users:
     post:
       consumes:
       - application/json
@@ -1045,24 +1054,7 @@ paths:
             type: string
       summary: Регистрация пользователя
       tags:
-      - Auth
-  /health:
-    get:
-      consumes:
-      - application/json
-      description: Проверка работоспособности API
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Health check
-      tags:
-      - System
+      - Users
 schemes:
 - http
 securityDefinitions:

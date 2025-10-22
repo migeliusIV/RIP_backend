@@ -8,7 +8,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-
+	"errors"
+	
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -31,8 +32,14 @@ func (h *Handler) GetGates(ctx *gin.Context) {
 		logrus.Error(err)
 		return
 	}
+	
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
+		return
+	}
 
-	draftTask, _ := h.Repository.GetDraftTask(hardcodedUserID)
+	draftTask, _ := h.Repository.GetDraftTask(userID)
 	var taskID uint = 0
 	var gatesCount int = 0
 
@@ -81,7 +88,7 @@ func (h *Handler) GetGateByID(ctx *gin.Context) {
 // ApiGatesList godoc
 // @Summary      Получить список гейтов
 // @Description  Возвращает список всех гейтов. Поддерживает фильтрацию по названию.
-// @Tags         gates
+// @Tags         Gates
 // @Produce      json
 // @Param        title query string false "Фильтр по названию гейта (поиск по подстроке)"
 // @Success      200 {array} DTO_Resp_Gate
@@ -118,7 +125,7 @@ func (h *Handler) ApiGatesList(ctx *gin.Context) {
 // ApiGetGateByID godoc
 // @Summary      Получить гейт по ID
 // @Description  Возвращает полную информацию о гейте по его идентификатору.
-// @Tags         gates
+// @Tags         Gates
 // @Produce      json
 // @Param        id path int true "ID гейта"
 // @Success      200 {object} ds.Gate
@@ -143,7 +150,7 @@ func (h *Handler) ApiGetGateByID(ctx *gin.Context) {
 // ApiAddGate godoc
 // @Summary      Создать новый гейт
 // @Description  Создаёт новый квантовый гейт с указанными параметрами.
-// @Tags         gates
+// @Tags         Gates
 // @Accept       json
 // @Produce      json
 // @Param        gate body DTO_Req_GateCreate true "Данные нового гейта"
@@ -185,7 +192,7 @@ func (h *Handler) ApiAddGate(ctx *gin.Context) {
 // ApiUpdateGate godoc
 // @Summary      Обновить гейт
 // @Description  Обновляет существующий гейт по ID.
-// @Tags         gates
+// @Tags         Gates
 // @Accept       json
 // @Produce      json
 // @Param        id   path int true "ID гейта"
@@ -217,7 +224,7 @@ func (h *Handler) ApiUpdateGate(ctx *gin.Context) {
 // ApiDeleteGate godoc
 // @Summary      Удалить гейт
 // @Description  Удаляет гейт по ID.
-// @Tags         gates
+// @Tags         Gates
 // @Produce      json
 // @Param        id path int true "ID гейта"
 // @Success      200 {object} DTO_Resp_SimpleID
@@ -241,14 +248,14 @@ func (h *Handler) ApiDeleteGate(ctx *gin.Context) {
 // ApiAddGateToDraft godoc
 // @Summary      Добавить гейт в черновик задачи
 // @Description  Добавляет указанный гейт в текущую черновую задачу пользователя.
-// @Tags         tasks
+// @Tags         Gates
 // @Produce      json
 // @Param        id path int true "ID гейта"
 // @Success      201 {object} DTO_Resp_TaskServiceLink
 // @Failure      400 {object} map[string]string "Некорректный ID гейта"
 // @Failure      401 {object} map[string]string "Требуется авторизация"
 // @Failure      500 {object} map[string]string "Ошибка при добавлении гейта в задачу"
-// @Router       /api/tasks/draft/gate/{id} [post]
+// @Router       /api/draft/gates/{id} [post]
 func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -275,7 +282,7 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		}
 		task = &newTask
 	}
-	if err := h.Repository.AddGateToTask(userID, uint(id)); err != nil {
+	if err := h.Repository.AddGateToTask(task.ID_task, uint(id)); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
@@ -285,13 +292,18 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 // ApiGetCurrQTask godoc
 // @Summary      Получить информацию о текущей черновой задаче
 // @Description  Возвращает ID текущей черновой задачи и количество добавленных в неё гейтов.
-// @Tags         tasks
+// @Tags         QuantumTasks
 // @Produce      json
 // @Success      200 {object} DTO_Resp_CurrTaskInfo
 // @Failure      500 {object} map[string]string "Ошибка при получении данных задачи"
-// @Router       /api/tasks/draft [get]
+// @Router       /api/quantum_task/current [get]
 func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
-	draftTask, _ := h.Repository.GetDraftTask(hardcodedUserID)
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
+		return
+	}
+	draftTask, _ := h.Repository.GetDraftTask(userID)
 	var taskID uint = 0
 	var gatesCount int = 0
 	if draftTask != nil {
@@ -307,7 +319,7 @@ func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
 // ApiUploadGatesImage godoc
 // @Summary      Загрузить изображение для гейта
 // @Description  Загружает изображение гейта и обновляет URL в базе данных.
-// @Tags         gates
+// @Tags         Gates
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        id   path int true "ID гейта"

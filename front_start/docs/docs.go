@@ -24,6 +24,102 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет JWT токен в черный список и выполняет деавторизацию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Выход из системы",
+                "responses": {
+                    "200": {
+                        "description": "Сообщение об успешном выходе\" {\"message\": \"Деавторизация прошла успешно\"}",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid authorization header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/draft/gates/{id}": {
+            "post": {
+                "description": "Добавляет указанный гейт в текущую черновую задачу пользователя.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gates"
+                ],
+                "summary": "Добавить гейт в черновик задачи",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID гейта",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID гейта",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при добавлении гейта в задачу",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/gates": {
             "get": {
                 "description": "Возвращает список всех гейтов. Поддерживает фильтрацию по названию.",
@@ -31,7 +127,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Получить список гейтов",
                 "parameters": [
@@ -72,7 +168,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Создать новый гейт",
                 "parameters": [
@@ -121,7 +217,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Получить гейт по ID",
                 "parameters": [
@@ -178,7 +274,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Обновить гейт",
                 "parameters": [
@@ -232,7 +328,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Удалить гейт",
                 "parameters": [
@@ -282,7 +378,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "gates"
+                    "Gates"
                 ],
                 "summary": "Загрузить изображение для гейта",
                 "parameters": [
@@ -329,7 +425,454 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/me": {
+        "/api/quantum_task/current": {
+            "get": {
+                "description": "Возвращает ID текущей черновой задачи и количество добавленных в неё гейтов.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Получить информацию о текущей черновой задаче",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_CurrTaskInfo"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при получении данных задачи",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/quantum_tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список квантовых задач. Пользователь видит только свои задачи, модератор - все задачи, неавторизованный пользователь - ошибку доступа.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Получить список задач",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Фильтр по статусу",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Начальная дата (фильтр от)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Конечная дата (фильтр до)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список задач",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/quantum_tasks/{id}": {
+            "get": {
+                "description": "Возвращает детальную информацию о квантовой задаче по её идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Получить задачу по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Детали задачи",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid task ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновляет описание квантовой задачи",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Обновить задачу",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Req_TaskUpd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновленная задача",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Полностью удаляет квантовую задачу из системы",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Удалить задачу",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ID удаленной задачи",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_SimpleID"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid task ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/quantum_tasks/{id}/form": {
+            "put": {
+                "description": "Переводит задачу из статуса черновика в статус сформированной",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Сформировать задачу",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Сформированная задача",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid task ID or cannot form task",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/quantum_tasks/{id}/resolve": {
+            "put": {
+                "description": "Выполняет завершение или отклонение квантовой задачи с вычислением результата",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "QuantumTasks"
+                ],
+                "summary": "Завершить/отклонить задачу",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Действие с задачей",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Req_TaskResolve"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Решенная задача",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or missing required fields",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{task_id}/services/{service_id}": {
+            "put": {
+                "description": "Обновляет значение градусов для конкретного гейта в задаче",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "M-M"
+                ],
+                "summary": "Обновить градусы гейта",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID гейта",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Новые значения градусов",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Req_DegreesUpd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновленные данные",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_UpdateDegrees"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет связь между гейтом и задачей",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "M-M"
+                ],
+                "summary": "Удалить гейт из задачи",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID гейта",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация об удаленной связи",
+                        "schema": {
+                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid IDs",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/me": {
             "get": {
                 "security": [
                     {
@@ -424,495 +967,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/tasks": {
-            "get": {
-                "description": "Возвращает список квантовых задач с возможностью фильтрации по статусу и датам",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Получить список задач",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Фильтр по статусу",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Начальная дата (фильтр от)",
-                        "name": "from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Конечная дата (фильтр до)",
-                        "name": "to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список задач",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/draft": {
-            "get": {
-                "description": "Возвращает ID текущей черновой задачи и количество добавленных в неё гейтов.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Получить информацию о текущей черновой задаче",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_CurrTaskInfo"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при получении данных задачи",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/draft/gate/{id}": {
-            "post": {
-                "description": "Добавляет указанный гейт в текущую черновую задачу пользователя.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Добавить гейт в черновик задачи",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID гейта",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID гейта",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Требуется авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при добавлении гейта в задачу",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/{id}": {
-            "get": {
-                "description": "Возвращает детальную информацию о квантовой задаче по её идентификатору",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Получить задачу по ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Детали задачи",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid task ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Task not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Обновляет описание квантовой задачи",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Обновить задачу",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Req_TaskUpd"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновленная задача",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Полностью удаляет квантовую задачу из системы",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Удалить задачу",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ID удаленной задачи",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_SimpleID"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid task ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/{id}/form": {
-            "post": {
-                "description": "Переводит задачу из статуса черновика в статус сформированной",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Сформировать задачу",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Сформированная задача",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid task ID or cannot form task",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/{id}/resolve": {
-            "post": {
-                "description": "Выполняет завершение или отклонение квантовой задачи с вычислением результата",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks API"
-                ],
-                "summary": "Завершить/отклонить задачу",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Действие с задачей",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Req_TaskResolve"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Решенная задача",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_Tasks"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input or missing required fields",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Task not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/{task_id}/gates/{service_id}": {
-            "delete": {
-                "description": "Удаляет связь между гейтом и задачей",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Task-Gate Relations"
-                ],
-                "summary": "Удалить гейт из задачи",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "task_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID гейта",
-                        "name": "service_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Информация об удаленной связи",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_TaskServiceLink"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid IDs",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/{task_id}/gates/{service_id}/degrees": {
-            "put": {
-                "description": "Обновляет значение градусов для конкретного гейта в задаче",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Task-Gate Relations"
-                ],
-                "summary": "Обновить градусы гейта",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID задачи",
-                        "name": "task_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID гейта",
-                        "name": "service_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Новые значения градусов",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Req_DegreesUpd"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновленные данные",
-                        "schema": {
-                            "$ref": "#/definitions/internal_app_handler.DTO_Resp_UpdateDegrees"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/login": {
+        "/login": {
             "post": {
                 "description": "Выполняет вход пользователя и возвращает JWT токен",
                 "consumes": [
@@ -922,7 +977,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Users"
                 ],
                 "summary": "Аутентификация пользователя",
                 "parameters": [
@@ -964,47 +1019,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/logout": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Добавляет JWT токен в черный список и выполняет деавторизацию",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Выход из системы",
-                "responses": {
-                    "200": {
-                        "description": "Сообщение об успешном выходе\" {\"message\": \"Деавторизация прошла успешно\"}",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid authorization header",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/register": {
+        "/users": {
             "post": {
                 "description": "Создает нового пользователя с указанными логином и паролем",
                 "consumes": [
@@ -1014,7 +1029,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Users"
                 ],
                 "summary": "Регистрация пользователя",
                 "parameters": [
@@ -1045,32 +1060,6 @@ const docTemplate = `{
                         "description": "Internal server error",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/health": {
-            "get": {
-                "description": "Проверка работоспособности API",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "System"
-                ],
-                "summary": "Health check",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     }
                 }

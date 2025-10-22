@@ -13,8 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const hardcodedUserID = 1
-
 func (h *Handler) AddGateToTask(c *gin.Context) {
 	gateID, err := strconv.Atoi(c.Param("id_gate"))
 	if err != nil {
@@ -94,34 +92,63 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 
 // ApiListQTasks возвращает список задач
 // @Summary Получить список задач
-// @Description Возвращает список квантовых задач с возможностью фильтрации по статусу и датам
-// @Tags Tasks API
+// @Description Возвращает список квантовых задач. Пользователь видит только свои задачи, модератор - все задачи, неавторизованный пользователь - ошибку доступа.
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param status query string false "Фильтр по статусу"
 // @Param from query string false "Начальная дата (фильтр от)"
 // @Param to query string false "Конечная дата (фильтр до)"
 // @Success 200 {array} DTO_Resp_Tasks "Список задач"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 403 {object} string "Forbidden"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks [get]
+// @Security BearerAuth
+// @Router /api/quantum_tasks [get]
 func (h *Handler) ApiListQTasks(ctx *gin.Context) {
-	status := ctx.Query("status")
-	from := ctx.Query("from")
-	to := ctx.Query("to")
+	// Получаем ID пользователя из контекста (устанавливается в middleware аутентификации)
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
+		return
+	}
 
-	tasks, err := h.Repository.ListTasks(status, from, to)
+	// Получаем информацию о пользователе
+	user, err := h.Repository.GetUserByID(userID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
+
+	status := ctx.Query("status")
+	from := ctx.Query("from")
+	to := ctx.Query("to")
+
+	var tasks []*ds.QuantumTask
+	
+	// Разделяем логику в зависимости от роли пользователя
+	if user.IsAdmin {
+		// Модератор видит все задачи
+		tasks, err = h.Repository.ListTasks(status, from, to)
+	} else {
+		// Обычный пользователь видит только свои задачи
+		tasks, err = h.Repository.ListTasksByUser(userID, status, from, to)
+	}
+
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Преобразуем задачи в DTO
 	var represent_tasks []DTO_Resp_Tasks
 	for _, task := range tasks {
 		// 1. Преобразуем GatesDegrees
 		var dtoGatesDegrees []DTO_Resp_GatesDegrees
 		for _, gateDegree := range task.GatesDegrees {
 			dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
-				ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
-				ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+				ID_gate: gateDegree.ID_gate,
+				ID_task: gateDegree.ID_task,
 				Degrees: gateDegree.Degrees,
 			})
 		}
@@ -139,20 +166,21 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 			GatesDegrees:    dtoGatesDegrees,
 		})
 	}
-    ctx.JSON(http.StatusOK, represent_tasks)
+
+	ctx.JSON(http.StatusOK, represent_tasks)
 }
 
 // ApiGetQTaskByID возвращает задачу по ID
 // @Summary Получить задачу по ID
 // @Description Возвращает детальную информацию о квантовой задаче по её идентификатору
-// @Tags Tasks API
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param id path int true "ID задачи"
 // @Success 200 {object} DTO_Resp_Tasks "Детали задачи"
 // @Failure 400 {object} string "Invalid task ID"
 // @Failure 404 {object} string "Task not found"
-// @Router /api/tasks/{id} [get]
+// @Router /api/quantum_tasks/{id} [get]
 func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -192,7 +220,7 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 // ApiUpdateQTask обновляет описание задачи
 // @Summary Обновить задачу
 // @Description Обновляет описание квантовой задачи
-// @Tags Tasks API
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param id path int true "ID задачи"
@@ -200,7 +228,7 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 // @Success 200 {object} DTO_Resp_Tasks "Обновленная задача"
 // @Failure 400 {object} string "Invalid input"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks/{id} [put]
+// @Router /api/quantum_tasks/{id} [put]
 func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -244,13 +272,13 @@ func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 // ApiFormQTask формирует задачу
 // @Summary Сформировать задачу
 // @Description Переводит задачу из статуса черновика в статус сформированной
-// @Tags Tasks API
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param id path int true "ID задачи"
 // @Success 200 {object} DTO_Resp_Tasks "Сформированная задача"
 // @Failure 400 {object} string "Invalid task ID or cannot form task"
-// @Router /api/tasks/{id}/form [post]
+// @Router /api/quantum_tasks/{id}/form [put]
 func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -289,7 +317,7 @@ func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 // ApiResolveQTask завершает или отклоняет задачу
 // @Summary Завершить/отклонить задачу
 // @Description Выполняет завершение или отклонение квантовой задачи с вычислением результата
-// @Tags Tasks API
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param id path int true "ID задачи"
@@ -299,7 +327,7 @@ func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 404 {object} string "Task not found"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks/{id}/resolve [post]
+// @Router /api/quantum_tasks/{id}/resolve [put]
 func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -415,14 +443,14 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 // ApiDeleteQTask удаляет задачу
 // @Summary Удалить задачу
 // @Description Полностью удаляет квантовую задачу из системы
-// @Tags Tasks API
+// @Tags QuantumTasks
 // @Accept json
 // @Produce json
 // @Param id path int true "ID задачи"
 // @Success 200 {object} DTO_Resp_SimpleID "ID удаленной задачи"
 // @Failure 400 {object} string "Invalid task ID"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks/{id} [delete]
+// @Router /api/quantum_tasks/{id} [delete]
 func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -442,7 +470,7 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 // ApiRemoveGateFromTask удаляет гейт из задачи
 // @Summary Удалить гейт из задачи
 // @Description Удаляет связь между гейтом и задачей
-// @Tags Task-Gate Relations
+// @Tags M-M
 // @Accept json
 // @Produce json
 // @Param task_id path int true "ID задачи"
@@ -450,7 +478,7 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 // @Success 200 {object} DTO_Resp_TaskServiceLink "Информация об удаленной связи"
 // @Failure 400 {object} string "Invalid IDs"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks/{task_id}/gates/{service_id} [delete]
+// @Router /api/tasks/{task_id}/services/{service_id} [delete]
 func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 	taskID, err1 := strconv.Atoi(ctx.Param("task_id"))
 	gateID, err2 := strconv.Atoi(ctx.Param("service_id"))
@@ -468,7 +496,7 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 // ApiUpdateDegrees обновляет градусы для гейта в задаче
 // @Summary Обновить градусы гейта
 // @Description Обновляет значение градусов для конкретного гейта в задаче
-// @Tags Task-Gate Relations
+// @Tags M-M
 // @Accept json
 // @Produce json
 // @Param task_id path int true "ID задачи"
@@ -477,7 +505,7 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 // @Success 200 {object} DTO_Resp_UpdateDegrees "Обновленные данные"
 // @Failure 400 {object} string "Invalid input"
 // @Failure 500 {object} string "Internal server error"
-// @Router /api/tasks/{task_id}/gates/{service_id}/degrees [put]
+// @Router /api/tasks/{task_id}/services/{service_id} [put]
 func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 	taskID, err1 := strconv.Atoi(ctx.Param("task_id"))
 	gateID, err2 := strconv.Atoi(ctx.Param("service_id"))
