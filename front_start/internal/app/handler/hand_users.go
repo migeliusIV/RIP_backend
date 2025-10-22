@@ -16,6 +16,17 @@ var creatorUserID uint = 1
 
 func currentUserID() uint { return creatorUserID }
 
+// Register регистрирует нового пользователя
+// @Summary Регистрация пользователя
+// @Description Создает нового пользователя с указанными логином и паролем
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body DTO_Req_UserReg true "Данные для регистрации"
+// @Success 200 {object} DTO_Resp_User "Зарегистрированный пользователь"
+// @Failure 400 {object} string "Invalid input data"
+// @Failure 500 {object} string "Internal server error"
+// @Router /auth/register [post]
 func (h *Handler) Register(ctx *gin.Context) {
     var req DTO_Req_UserReg
     if err := ctx.ShouldBindJSON(&req); err != nil || req.Login == "" || req.Password == "" {
@@ -36,6 +47,18 @@ func (h *Handler) Register(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, DTO_Resp_User{Login: req.Login})
 }
 
+// Login выполняет аутентификацию пользователя
+// @Summary Аутентификация пользователя
+// @Description Выполняет вход пользователя и возвращает JWT токен
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body DTO_Req_UserReg true "Учетные данные"
+// @Success 200 {object} DTO_Resp_TokenLogin "Токен и данные пользователя"
+// @Failure 400 {object} string "Invalid input data"
+// @Failure 401 {object} string "Invalid credentials"
+// @Failure 500 {object} string "Internal server error"
+// @Router /auth/login [post]
 func (h *Handler) Login(ctx *gin.Context) {
 	var req DTO_Req_UserReg
 	if err := ctx.BindJSON(&req); err != nil {
@@ -83,6 +106,17 @@ func (h *Handler) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
+// ApiMe возвращает информацию о текущем пользователе
+// @Summary Получить текущего пользователя
+// @Description Возвращает данные аутентифицированного пользователя
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} DTO_Resp_User "Данные пользователя"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/me [get]
 func (h *Handler) ApiMe(ctx *gin.Context) {
     user, err := h.Repository.GetUserByID(currentUserID())
     if err != nil {
@@ -92,6 +126,19 @@ func (h *Handler) ApiMe(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, DTO_Resp_User{Login: user.Login})
 }
 
+// ApiUpdateMe обновляет данные текущего пользователя
+// @Summary Обновить данные пользователя
+// @Description Обновляет пароль текущего аутентифицированного пользователя
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body DTO_Req_UserUpd true "Новые данные пользователя"
+// @Success 200 {object} DTO_Resp_User "Обновленные данные пользователя"
+// @Failure 400 {object} string "Invalid input data"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/me [put]
 func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
     var req DTO_Req_UserUpd
     if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -106,6 +153,17 @@ func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, DTO_Resp_User{Login: updated.Login})
 }
 
+// Logout выполняет выход пользователя
+// @Summary Выход из системы
+// @Description Добавляет JWT токен в черный список и выполняет деавторизацию
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} object "Сообщение об успешном выходе" {"message": "Деавторизация прошла успешно"}
+// @Failure 400 {object} string "Invalid authorization header"
+// @Failure 500 {object} string "Internal server error"
+// @Router /auth/logout [post]
 func (h *Handler) Logout(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
@@ -125,6 +183,8 @@ func (h *Handler) Logout(ctx *gin.Context) {
 	})
 }
 
+// getUserIDFromContext извлекает ID пользователя из контекста
+// Вспомогательная функция для внутреннего использования, не экспортируется в Swagger
 func getUserIDFromContext(ctx *gin.Context) (uint, error) {
 	value, exists := ctx.Get(userCtx)
 	if !exists {
@@ -140,6 +200,15 @@ func getUserIDFromContext(ctx *gin.Context) (uint, error) {
 }
 
 /*
+// ApiLogout выполняет выход пользователя (альтернативная версия)
+// @Summary Выход из системы (альтернативная версия)
+// @Description Альтернативная реализация выхода из системы
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} DTO_Resp_UserLogout "Статус выхода"
+// @Router /api/logout [post]
 func (h *Handler) ApiLogout(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, DTO_Resp_UserLogout{Logout: true})
 }

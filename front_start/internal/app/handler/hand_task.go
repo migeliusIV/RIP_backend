@@ -91,6 +91,19 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 }
 
 // ---- JSON API for tasks ----
+
+// ApiListQTasks возвращает список задач
+// @Summary Получить список задач
+// @Description Возвращает список квантовых задач с возможностью фильтрации по статусу и датам
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param status query string false "Фильтр по статусу"
+// @Param from query string false "Начальная дата (фильтр от)"
+// @Param to query string false "Конечная дата (фильтр до)"
+// @Success 200 {array} DTO_Resp_Tasks "Список задач"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks [get]
 func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 	status := ctx.Query("status")
 	from := ctx.Query("from")
@@ -129,6 +142,17 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, represent_tasks)
 }
 
+// ApiGetQTaskByID возвращает задачу по ID
+// @Summary Получить задачу по ID
+// @Description Возвращает детальную информацию о квантовой задаче по её идентификатору
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Success 200 {object} DTO_Resp_Tasks "Детали задачи"
+// @Failure 400 {object} string "Invalid task ID"
+// @Failure 404 {object} string "Task not found"
+// @Router /api/tasks/{id} [get]
 func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -165,6 +189,18 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, represent_task)
 }
 
+// ApiUpdateQTask обновляет описание задачи
+// @Summary Обновить задачу
+// @Description Обновляет описание квантовой задачи
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Param request body DTO_Req_TaskUpd true "Данные для обновления"
+// @Success 200 {object} DTO_Resp_Tasks "Обновленная задача"
+// @Failure 400 {object} string "Invalid input"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks/{id} [put]
 func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -205,6 +241,16 @@ func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, represent_task)
 }
 
+// ApiFormQTask формирует задачу
+// @Summary Сформировать задачу
+// @Description Переводит задачу из статуса черновика в статус сформированной
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Success 200 {object} DTO_Resp_Tasks "Сформированная задача"
+// @Failure 400 {object} string "Invalid task ID or cannot form task"
+// @Router /api/tasks/{id}/form [post]
 func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -240,6 +286,20 @@ func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, represent_task)
 }
 
+// ApiResolveQTask завершает или отклоняет задачу
+// @Summary Завершить/отклонить задачу
+// @Description Выполняет завершение или отклонение квантовой задачи с вычислением результата
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Param request body DTO_Req_TaskResolve true "Действие с задачей"
+// @Success 200 {object} DTO_Resp_Tasks "Решенная задача"
+// @Failure 400 {object} string "Invalid input or missing required fields"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 404 {object} string "Task not found"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks/{id}/resolve [post]
 func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -352,6 +412,17 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, represent_task)
 }
 
+// ApiDeleteQTask удаляет задачу
+// @Summary Удалить задачу
+// @Description Полностью удаляет квантовую задачу из системы
+// @Tags Tasks API
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Success 200 {object} DTO_Resp_SimpleID "ID удаленной задачи"
+// @Failure 400 {object} string "Invalid task ID"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks/{id} [delete]
 func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
@@ -368,6 +439,18 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 // ---- JSON API for m-m ----
 // moved to serialization.go
 
+// ApiRemoveGateFromTask удаляет гейт из задачи
+// @Summary Удалить гейт из задачи
+// @Description Удаляет связь между гейтом и задачей
+// @Tags Task-Gate Relations
+// @Accept json
+// @Produce json
+// @Param task_id path int true "ID задачи"
+// @Param service_id path int true "ID гейта"
+// @Success 200 {object} DTO_Resp_TaskServiceLink "Информация об удаленной связи"
+// @Failure 400 {object} string "Invalid IDs"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks/{task_id}/gates/{service_id} [delete]
 func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 	taskID, err1 := strconv.Atoi(ctx.Param("task_id"))
 	gateID, err2 := strconv.Atoi(ctx.Param("service_id"))
@@ -382,6 +465,19 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, DTO_Resp_TaskServiceLink{TaskID: uint(taskID), ServiceID: gateID})
 }
 
+// ApiUpdateDegrees обновляет градусы для гейта в задаче
+// @Summary Обновить градусы гейта
+// @Description Обновляет значение градусов для конкретного гейта в задаче
+// @Tags Task-Gate Relations
+// @Accept json
+// @Produce json
+// @Param task_id path int true "ID задачи"
+// @Param service_id path int true "ID гейта"
+// @Param request body DTO_Req_DegreesUpd true "Новые значения градусов"
+// @Success 200 {object} DTO_Resp_UpdateDegrees "Обновленные данные"
+// @Failure 400 {object} string "Invalid input"
+// @Failure 500 {object} string "Internal server error"
+// @Router /api/tasks/{task_id}/gates/{service_id}/degrees [put]
 func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 	taskID, err1 := strconv.Atoi(ctx.Param("task_id"))
 	gateID, err2 := strconv.Atoi(ctx.Param("service_id"))
