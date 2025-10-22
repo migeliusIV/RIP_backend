@@ -91,19 +91,42 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 }
 
 // ---- JSON API for tasks ----
-
-// moved to serialization.go
-
 func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 	status := ctx.Query("status")
 	from := ctx.Query("from")
 	to := ctx.Query("to")
+
 	tasks, err := h.Repository.ListTasks(status, from, to)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_TasksListResponse{Items: tasks})
+	var represent_tasks []DTO_Resp_Tasks
+	for _, task := range tasks {
+		// 1. Преобразуем GatesDegrees
+		var dtoGatesDegrees []DTO_Resp_GatesDegrees
+		for _, gateDegree := range task.GatesDegrees {
+			dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
+				ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+				ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+				Degrees: gateDegree.Degrees,
+			})
+		}
+	
+		// 2. Создаём DTO задачи
+		represent_tasks = append(represent_tasks, DTO_Resp_Tasks{
+			ID_task:         task.ID_task,
+			TaskStatus:      task.TaskStatus,
+			CreationDate:    task.CreationDate,
+			ID_user:         task.ID_user,
+			ConclusionDate:  task.ConclusionDate,
+			TaskDescription: task.TaskDescription,
+			Res_koeff_0:     task.Res_koeff_0,
+			Res_koeff_1:     task.Res_koeff_1,
+			GatesDegrees:    dtoGatesDegrees,
+		})
+	}
+    ctx.JSON(http.StatusOK, represent_tasks)
 }
 
 func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
@@ -117,7 +140,29 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, task)
+
+	var represent_task DTO_Resp_Tasks
+	var dtoGatesDegrees []DTO_Resp_GatesDegrees
+	for _, gateDegree := range task.GatesDegrees {
+		dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
+			ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+			Degrees: gateDegree.Degrees,
+		})
+	}
+
+	represent_task = DTO_Resp_Tasks{
+		ID_task:         task.ID_task,
+		TaskStatus:      task.TaskStatus,
+		CreationDate:    task.CreationDate,
+		ID_user:         task.ID_user,
+		ConclusionDate:  task.ConclusionDate,
+		TaskDescription: task.TaskDescription,
+		Res_koeff_0:     task.Res_koeff_0,
+		Res_koeff_1:     task.Res_koeff_1,
+		GatesDegrees:    dtoGatesDegrees,
+	}
+	ctx.JSON(http.StatusOK, represent_task)
 }
 
 func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
@@ -126,17 +171,38 @@ func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-    var req DTO_taskUpdateRequest
+    var req DTO_Req_TaskUpd
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	updated, err := h.Repository.UpdateTask(uint(id), req.TaskDescription)
+	task, err := h.Repository.UpdateTask(uint(id), req.TaskDescription)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, updated)
+	var represent_task DTO_Resp_Tasks
+	var dtoGatesDegrees []DTO_Resp_GatesDegrees
+	for _, gateDegree := range task.GatesDegrees {
+		dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
+			ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+			Degrees: gateDegree.Degrees,
+		})
+	}
+
+	represent_task = DTO_Resp_Tasks{
+		ID_task:         task.ID_task,
+		TaskStatus:      task.TaskStatus,
+		CreationDate:    task.CreationDate,
+		ID_user:         task.ID_user,
+		ConclusionDate:  task.ConclusionDate,
+		TaskDescription: task.TaskDescription,
+		Res_koeff_0:     task.Res_koeff_0,
+		Res_koeff_1:     task.Res_koeff_1,
+		GatesDegrees:    dtoGatesDegrees,
+	}
+	ctx.JSON(http.StatusOK, represent_task)
 }
 
 func (h *Handler) ApiFormQTask(ctx *gin.Context) {
@@ -145,15 +211,34 @@ func (h *Handler) ApiFormQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	formed, err := h.Repository.FormTask(uint(id), time.Now())
+	task, err := h.Repository.FormTask(uint(id), time.Now())
 	if err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, formed)
-}
+	var represent_task DTO_Resp_Tasks
+	var dtoGatesDegrees []DTO_Resp_GatesDegrees
+	for _, gateDegree := range task.GatesDegrees {
+		dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
+			ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+			Degrees: gateDegree.Degrees,
+		})
+	}
 
-// moved to serialization.go
+	represent_task = DTO_Resp_Tasks{
+		ID_task:         task.ID_task,
+		TaskStatus:      task.TaskStatus,
+		CreationDate:    task.CreationDate,
+		ID_user:         task.ID_user,
+		ConclusionDate:  task.ConclusionDate,
+		TaskDescription: task.TaskDescription,
+		Res_koeff_0:     task.Res_koeff_0,
+		Res_koeff_1:     task.Res_koeff_1,
+		GatesDegrees:    dtoGatesDegrees,
+	}
+	ctx.JSON(http.StatusOK, represent_task)
+}
 
 func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
@@ -165,7 +250,7 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 	
 	logrus.Infof("Processing resolve request for task ID: %d", id)
 	
-    var req DTO_resolveRequest
+    var req DTO_Req_TaskResolve
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Более детальная обработка ошибки JSON
 		logrus.Errorf("JSON binding error for task %d: %v", id, err)
@@ -228,21 +313,43 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 		logrus.Infof("Successfully calculated result for task %d", id)
 	}
 	
-	userID, err := getUserIDFromContext(c)
+	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
-		h.errorHandler(c, http.StatusUnauthorized, err)
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
 	adminID := uint(userID)
-	resolved, err := h.Repository.ResolveTask(uint(id), adminID, req.Action, time.Now())
+	task, err := h.Repository.ResolveTask(uint(id), adminID, req.Action, time.Now())
 	if err != nil {
 		logrus.Errorf("Failed to resolve task %d: %v", id, err)
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	
+
+	var represent_task DTO_Resp_Tasks
+	var dtoGatesDegrees []DTO_Resp_GatesDegrees
+	for _, gateDegree := range task.GatesDegrees {
+		dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
+			ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
+			Degrees: gateDegree.Degrees,
+		})
+	}
+
+	represent_task = DTO_Resp_Tasks{
+		ID_task:         task.ID_task,
+		TaskStatus:      task.TaskStatus,
+		CreationDate:    task.CreationDate,
+		ID_user:         task.ID_user,
+		ConclusionDate:  task.ConclusionDate,
+		TaskDescription: task.TaskDescription,
+		Res_koeff_0:     task.Res_koeff_0,
+		Res_koeff_1:     task.Res_koeff_1,
+		GatesDegrees:    dtoGatesDegrees,
+	}
+
 	logrus.Infof("Successfully resolved task %d with action: %s", id, req.Action)
-	h.okJSON(ctx, http.StatusOK, resolved)
+	ctx.JSON(http.StatusOK, represent_task)
 }
 
 func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
@@ -255,7 +362,7 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_SimpleIDResponse{ID: id})
+    ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
 }
 
 // ---- JSON API for m-m ----
@@ -272,7 +379,7 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_TaskServiceLinkResponse{TaskID: uint(taskID), ServiceID: gateID})
+    ctx.JSON(http.StatusOK, DTO_Resp_TaskServiceLink{TaskID: uint(taskID), ServiceID: gateID})
 }
 
 func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
@@ -282,7 +389,7 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid ids"))
 		return
 	}
-    var req DTO_updateDegreesRequest
+    var req DTO_Req_DegreesUpd
 	if err := ctx.ShouldBindJSON(&req); err != nil || req.Degrees == nil {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("degrees required"))
 		return
@@ -291,5 +398,5 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_UpdateDegreesResponse{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
+    ctx.JSON(http.StatusOK, DTO_Resp_UpdateDegrees{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
 }

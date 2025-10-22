@@ -1,21 +1,21 @@
 package handler
 
 import (
-	"front_start/internal/app/repository"
+    "front_start/internal/app/config"
+    appredis "front_start/internal/app/redis"
+    "front_start/internal/app/repository"
 
-	"RIP/internal/app/config"
-	"RIP/internal/app/redis"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+    "github.com/gin-gonic/gin"
+    "github.com/sirupsen/logrus"
 )
 
 type Handler struct {
 	Repository *repository.Repository
-	Redis      *redis.Client
+    Redis      *appredis.Client
 	JWTConfig  *config.JWTConfig
 }
 
-func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config.JWTConfig) *Handler {
+func NewHandler(r *repository.Repository, redis *appredis.Client, jwtConfig *config.JWTConfig) *Handler {
 	return &Handler{
 		Repository: r,
 		Redis:      redis,
@@ -25,11 +25,13 @@ func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config
 
 // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
 func (handler *Handler) RegisterHandler(r *gin.Engine) {
-	r.POST("/auth/login", handler.Login)
+	r.POST("/login", handler.Login)
 	r.POST("/users", handler.Register)
+	r.GET("/IBM", handler.GetGates)
+
 	// Эндпоинты, доступные только модераторам
-	moderator := r.Group("/")
-	moderator.Use(h.AuthMiddleware, h.ModeratorMiddleware)
+    moderator := r.Group("/")
+    moderator.Use(handler.AuthMiddleware, handler.ModeratorMiddleware)
 	{
 		// Управление факторами (создание, изменение, удаление)
 		moderator.POST("/api/gates", handler.ApiAddGate)
@@ -41,18 +43,18 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		moderator.PUT("/api/quantum_tasks/:id/resolve", handler.ApiResolveQTask)
 	}
 	// Эндпоинты, доступные всем авторизованным пользователям
-	auth := r.Group("/")
-	auth.Use(h.AuthMiddleware)
+    auth := r.Group("/")
+    auth.Use(handler.AuthMiddleware)
 	{
 		// Пользователи
-		auth.POST("/api/auth/logout", handler.ApiLogout)
+		auth.POST("/api/auth/logout", handler.Logout)
 		auth.GET("/api/users/me", handler.ApiMe)
 		auth.PUT("/api/users/me", handler.ApiUpdateMe)
 		// m-m (2)
 		auth.DELETE("/api/tasks/:task_id/services/:service_id", handler.ApiRemoveGateFromTask)
 		auth.PUT("/api/tasks/:task_id/services/:service_id", handler.ApiUpdateDegrees)
 		// каша
-		auth.GET("/IBM", handler.GetGates)
+		//auth.GET("/IBM", handler.GetGates)
 		auth.GET("/gate_property/:id", handler.GetGateByID)
 		auth.GET("/quantum_task/:id", handler.GetTask)
 		auth.POST("/quantum_task/add/gate/:id_gate", handler.AddGateToTask) // orm

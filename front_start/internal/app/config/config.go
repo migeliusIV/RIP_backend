@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os"
-
+	"os"    
+	"strconv"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -69,8 +69,8 @@ func NewConfig() (*Config, error) {
 	redisUser := os.Getenv("REDIS_USER")
 
 	return &Config{
-		ServiceHost: host,
-		ServicePort: port,
+		ServiceHost: cfg.ServiceHost,
+		ServicePort: cfg.ServicePort,
 		JWT: JWTConfig{
 			Secret:    jwtSecret,
 			ExpiresIn: jwtExpiresIn,

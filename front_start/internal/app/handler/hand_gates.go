@@ -77,17 +77,32 @@ func (h *Handler) GetGateByID(ctx *gin.Context) {
 }
 
 // ---- JSON API (services/gates) ----
-
-// moved to serialization.go
-
 func (h *Handler) ApiGatesList(ctx *gin.Context) {
 	title := ctx.Query("title")
-	gates, err := h.Repository.ListGates(title) //ListServices -> ListGates
+	gates, err := h.Repository.ListGates(title)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_GatesListResponse{Items: gates})
+	var represent_gates []DTO_Resp_Gate
+	for _, gate := range gates {
+		represent_gates = append(represent_gates, DTO_Resp_Gate{
+			ID_gate: gate.ID_gate,
+			Title: gate.Title,
+			Description: gate.Description,
+			Status: gate.Status,
+			Image: gate.Image,
+			I0j0: gate.I0j0,
+			I0j1: gate.I0j1,
+			I1j0: gate.I1j0,
+			I1j1: gate.I1j1,
+			Matrix_koeff: gate.Matrix_koeff,
+			// subject area
+			FullInfo: gate.FullInfo,
+			TheAxis: gate.TheAxis,
+		})
+	}
+    ctx.JSON(http.StatusOK, represent_gates)
 }
 
 func (h *Handler) ApiGetGateByID(ctx *gin.Context) {
@@ -101,11 +116,11 @@ func (h *Handler) ApiGetGateByID(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gate)
+	ctx.JSON(http.StatusOK, gate)
 }
 
 func (h *Handler) ApiAddGate(ctx *gin.Context) {
-    var req DTO_serviceCreateRequest
+    var req DTO_Req_GateCreate
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -119,6 +134,11 @@ func (h *Handler) ApiAddGate(ctx *gin.Context) {
 		Description: req.Description,
 		FullInfo:    req.FullInfo,
 		TheAxis:     req.TheAxis,
+		I0j0: req.I0j0,
+		I0j1: req.I0j1,
+		I1j0: req.I1j0,
+		I1j1: req.I1j1,
+		Matrix_koeff: req.Matrix_koeff, 
 	}
 	if req.Status != nil {
 		gate.Status = *req.Status
@@ -127,7 +147,7 @@ func (h *Handler) ApiAddGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, gate)
+	ctx.JSON(http.StatusCreated, gate)
 }
 
 func (h *Handler) ApiUpdateGate(ctx *gin.Context) {
@@ -136,7 +156,7 @@ func (h *Handler) ApiUpdateGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-    var req DTO_serviceCreateRequest
+    var req DTO_Req_GateCreate
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -147,7 +167,7 @@ func (h *Handler) ApiUpdateGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, updated)
+	ctx.JSON(http.StatusOK, updated)
 }
 
 func (h *Handler) ApiDeleteGate(ctx *gin.Context) {
@@ -161,7 +181,7 @@ func (h *Handler) ApiDeleteGate(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_SimpleIDResponse{ID: id})
+    ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
 }
 
 func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
@@ -171,9 +191,9 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		return
 	}
 	// Reuse HTML flow: get or create draft, then add gate to task
-	userID, err := getUserIDFromContext(c)
+	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
-		h.errorHandler(c, http.StatusUnauthorized, err)
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
 	task, err := h.Repository.GetDraftTask(userID)
@@ -190,11 +210,11 @@ func (h *Handler) ApiAddGateToDraft(ctx *gin.Context) {
 		}
 		task = &newTask
 	}
-	if err := h.Repository.AddGateToTask(userID, uint(factorID)); err != nil {
+	if err := h.Repository.AddGateToTask(userID, uint(id)); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusCreated, DTO_TaskServiceLinkResponse{TaskID: task.ID_task, ServiceID: id})
+    ctx.JSON(http.StatusCreated, DTO_Resp_TaskServiceLink{TaskID: task.ID_task, ServiceID: id})
 }
 
 func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
@@ -208,7 +228,7 @@ func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
 			gatesCount = len(fullTask.GatesDegrees)
 		}
 	}
-    h.okJSON(ctx, http.StatusOK, DTO_CurrTaskInfoResponse{TaskID: taskID, ServicesCount: gatesCount})
+    ctx.JSON(http.StatusOK, DTO_Resp_CurrTaskInfo{TaskID: taskID, ServicesCount: gatesCount})
 }
 
 // ApiUploadServiceImage: accepts multipart form with field "file", sets image name
@@ -229,7 +249,7 @@ func (h *Handler) ApiUploadGatesImage(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    h.okJSON(ctx, http.StatusCreated, DTO_UploadImageResponse{ID: id, Image: imageURL})
+    ctx.JSON(http.StatusCreated, DTO_Resp_UploadImg{ID: id, Image: imageURL})
 }
 
 func generateSafeImageName(fh *multipart.FileHeader) string {

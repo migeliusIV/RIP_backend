@@ -19,6 +19,14 @@ func (r *Repository) GetUserByID(id uint) (*ds.Users, error) {
     return &u, nil
 }
 
+func (r *Repository) GetUserByUsername(login string) (*ds.Users, error) {
+    var u ds.Users
+    if err := r.db.First(&u, "login = ?", login).Error; err != nil {
+        return nil, err
+    }
+    return &u, nil
+}
+
 func (r *Repository) UpdateUser(id uint, password *string) (*ds.Users, error) {
     var u ds.Users
     if err := r.db.First(&u, "id_user = ?", id).Error; err != nil {
