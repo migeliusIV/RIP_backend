@@ -108,9 +108,11 @@ func (r *Repository) ListTasksByUser(userID uint, status, from, to string) ([]*d
 		query = query.Where("task_status = ?", status)
 	} else {
 		query = query.Where("task_status NOT IN ?", []string{ds.StatusDeleted, ds.StatusDraft})
-	} if from != "" {
+	}
+	if from != "" {
 		query = query.Where("creation_date >= ?", from)
-	} if to != "" {
+	}
+	if to != "" {
 		query = query.Where("creation_date <= ?", to)
 	}
 
