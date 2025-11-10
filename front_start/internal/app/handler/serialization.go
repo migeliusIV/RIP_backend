@@ -57,18 +57,18 @@ type DTO_Req_DegreesUpd struct {
 // DTO_Resp_Gate ответ с данными гейта
 // @Description Полная информация о квантовом гейте
 type DTO_Resp_Gate struct {
-    ID_gate     uint    `gorm:"column:id_gate;primaryKey;autoIncrement" json:"id_gate" example:"1"`
-    Title       string  `gorm:"column:title;size:255;not null;default:gate-no-name;unique" json:"title" example:"Pauli-X"`
-    Description string  `gorm:"column:description;not null" json:"description" example:"Quantum NOT gate"`
-    Status      bool    `gorm:"column:status; default:true" json:"status" example:"true"`
-    Image       *string `gorm:"column:image" json:"image" example:"gate_x.png"`
-    I0j0 		*int 	`gorm:"column:i0_j0" json:"i0j0" example:"0"`
-    I0j1 		*int 	`gorm:"column:i0_j1" json:"i0j1" example:"1"`
-    I1j0 		*int 	`gorm:"column:i1_j0" json:"i1j0" example:"1"`
-    I1j1 		*int 	`gorm:"column:i1_j1" json:"i1j1" example:"0"`
-    Matrix_koeff *float32 `gorm:"column:matrix_koeff" json:"matrix_koeff" example:"1.0"`
-    FullInfo string `gorm:"column:full_info;not null" json:"full_info" example:"Bit flip gate"`
-    TheAxis  string `gorm:"column:the_axis" json:"the_axis" example:"X"`
+    ID_gate     uint    `gorm:"column:id_gate;primaryKey;autoIncrement" json:"ID_gate" example:"1"`
+    Title       string  `gorm:"column:title;size:255;not null;default:gate-no-name;unique" json:"Title" example:"Pauli-X"`
+    Description string  `gorm:"column:description;not null" json:"Description" example:"Quantum NOT gate"`
+    Status      bool    `gorm:"column:status; default:true" json:"Status" example:"true"`
+    Image       *string `gorm:"column:image" json:"Image" example:"gate_x.png"`
+    I0j0 		*int 	`gorm:"column:i0_j0" json:"I0j0" example:"0"`
+    I0j1 		*int 	`gorm:"column:i0_j1" json:"I0j1" example:"1"`
+    I1j0 		*int 	`gorm:"column:i1_j0" json:"I1j0" example:"1"`
+    I1j1 		*int 	`gorm:"column:i1_j1" json:"I1j1" example:"0"`
+    Matrix_koeff *float32 `gorm:"column:matrix_koeff" json:"Matrix_koeff" example:"1.0"`
+    FullInfo string `gorm:"column:full_info;not null" json:"Full_info" example:"Bit flip gate"`
+    TheAxis  string `gorm:"column:the_axis" json:"TheAxis" example:"X"`
 }
 
 // DTO_Resp_UploadImg ответ загрузки изображения

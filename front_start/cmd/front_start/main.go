@@ -22,7 +22,8 @@ package main
 
 import (
 	"fmt"
-
+	"net/http"
+	
 	"front_start/internal/app/config"
 	"front_start/internal/app/dsn"
 	"front_start/internal/app/handler"
@@ -46,6 +47,14 @@ func main() {
 	
 	// Добавляем Swagger UI маршрут ДО инициализации приложения
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"message": "Quantum Tasks API is running",
+		})
+	})
 
 	conf, err := config.NewConfig()
 	if err != nil {
