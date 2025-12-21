@@ -32,8 +32,8 @@ func (h *Handler) AddGateToTask(c *gin.Context) {
 			ID_user:      userID,
 			TaskStatus:   ds.StatusDraft,
 			CreationDate: time.Now(),
-			Res_koeff_0:  1.0,  // Начальное значение для |0⟩
-			Res_koeff_1:  0.0,  // Начальное значение для |1⟩
+			Res_koeff_0:  1.0, // Начальное значение для |0⟩
+			Res_koeff_1:  0.0, // Начальное значение для |1⟩
 		}
 		if createErr := h.Repository.CreateTask(&newTask); createErr != nil {
 			h.errorHandler(c, http.StatusInternalServerError, createErr)
@@ -69,11 +69,11 @@ func (h *Handler) GetTask(c *gin.Context) {
 		h.errorHandler(c, http.StatusForbidden, errors.New("cannot access an empty frax page, add factors first"))
 		return
 	}
-	
+
 	var taskRepresent ds.QuantumTask
-	taskRepresent = *task  // разыменовываем указатель
-	taskRepresent.Res_koeff_0 = task.Res_koeff_0 * task.Res_koeff_0  // квадрат первого коэффициента
-	taskRepresent.Res_koeff_1 = task.Res_koeff_1 * task.Res_koeff_1  // квадрат второго коэффициента
+	taskRepresent = *task                                           // разыменовываем указатель
+	taskRepresent.Res_koeff_0 = task.Res_koeff_0 * task.Res_koeff_0 // квадрат первого коэффициента
+	taskRepresent.Res_koeff_1 = task.Res_koeff_1 * task.Res_koeff_1 // квадрат второго коэффициента
 	c.HTML(http.StatusOK, "quantum_task.html", taskRepresent)
 }
 
@@ -125,7 +125,7 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 	to := ctx.Query("to")
 
 	var tasks []*ds.QuantumTask
-	
+
 	// Разделяем логику в зависимости от роли пользователя
 	if user.IsAdmin {
 		// Модератор видит все задачи
@@ -152,7 +152,7 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 				Degrees: gateDegree.Degrees,
 			})
 		}
-	
+
 		// 2. Создаём DTO задачи
 		represent_tasks = append(represent_tasks, DTO_Resp_Tasks{
 			ID_task:         task.ID_task,
@@ -160,6 +160,7 @@ func (h *Handler) ApiListQTasks(ctx *gin.Context) {
 			CreationDate:    task.CreationDate,
 			ID_user:         task.ID_user,
 			ConclusionDate:  task.ConclusionDate,
+			FormedDate:      task.FormedDate,
 			TaskDescription: task.TaskDescription,
 			Res_koeff_0:     task.Res_koeff_0,
 			Res_koeff_1:     task.Res_koeff_1,
@@ -196,8 +197,19 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 	var represent_task DTO_Resp_Tasks
 	var dtoGatesDegrees []DTO_Resp_GatesDegrees
 	for _, gateDegree := range task.GatesDegrees {
+		gateInfo, err := h.Repository.GetGateByID(int(gateDegree.ID_gate))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			logrus.Error(err)
+			return
+		}
+
 		dtoGatesDegrees = append(dtoGatesDegrees, DTO_Resp_GatesDegrees{
-			ID_gate: gateDegree.ID_gate, // или gateDegree.Gate.ID_gate, если нужно
+			Title:   gateInfo.Title, // или gateDegree.Gate.ID_gate, если нужно
+			TheAxis: gateInfo.TheAxis,
+			Image:   gateInfo.Image,
 			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
 			Degrees: gateDegree.Degrees,
 		})
@@ -235,7 +247,7 @@ func (h *Handler) ApiUpdateQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-    var req DTO_Req_TaskUpd
+	var req DTO_Req_TaskUpd
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -335,10 +347,10 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	
+
 	logrus.Infof("Processing resolve request for task ID: %d", id)
-	
-    var req DTO_Req_TaskResolve
+
+	var req DTO_Req_TaskResolve
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Более детальная обработка ошибки JSON
 		logrus.Errorf("JSON binding error for task %d: %v", id, err)
@@ -349,19 +361,19 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 		}
 		return
 	}
-	
+
 	// Проверяем, что action указан
 	if req.Action == "" {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("action field is required"))
 		return
 	}
-	
+
 	// Проверяем, что action имеет допустимое значение
 	if req.Action != "complete" && req.Action != "reject" {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("action must be 'complete' or 'reject'"))
 		return
 	}
-	
+
 	// Если задача завершается, вычисляем результат
 	if req.Action == "complete" {
 		// Проверяем, что у задачи есть все необходимые параметры для вычисления результата
@@ -370,37 +382,37 @@ func (h *Handler) ApiResolveQTask(ctx *gin.Context) {
 			h.errorHandler(ctx, http.StatusNotFound, err)
 			return
 		}
-		
+
 		// Проверяем наличие описания задачи
 		if task.TaskDescription == "" {
 			h.errorHandler(ctx, http.StatusBadRequest, errors.New("task description is required for completion"))
 			return
 		}
-		
+
 		// Проверяем, что у всех гейтов указаны градусы
 		for _, gateDegree := range task.GatesDegrees {
 			var currGate = gateDegree.Gate
 
-			if gateDegree.Degrees == nil && currGate.TheAxis != "non"{
-				h.errorHandler(ctx, http.StatusBadRequest, 
-					fmt.Errorf("degrees not specified for gate %s (ID: %d)", 
+			if gateDegree.Degrees == nil && currGate.TheAxis != "non" {
+				h.errorHandler(ctx, http.StatusBadRequest,
+					fmt.Errorf("degrees not specified for gate %s (ID: %d)",
 						gateDegree.Gate.Title, gateDegree.Gate.ID_gate))
 				return
 			}
 		}
-		
+
 		// Вычисляем результат квантовой задачи
 		logrus.Infof("Calculating result for task %d", id)
 		err = h.Repository.GetQTaskRes(uint(id))
 		if err != nil {
 			logrus.Errorf("Failed to calculate result for task %d: %v", id, err)
-			h.errorHandler(ctx, http.StatusInternalServerError, 
+			h.errorHandler(ctx, http.StatusInternalServerError,
 				fmt.Errorf("failed to calculate task result: %v", err))
 			return
 		}
 		logrus.Infof("Successfully calculated result for task %d", id)
 	}
-	
+
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusUnauthorized, err)
@@ -461,7 +473,7 @@ func (h *Handler) ApiDeleteQTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
+	ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
 }
 
 // ---- JSON API for m-m ----
@@ -490,7 +502,7 @@ func (h *Handler) ApiRemoveGateFromTask(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    ctx.JSON(http.StatusOK, DTO_Resp_TaskServiceLink{TaskID: uint(taskID), ServiceID: gateID})
+	ctx.JSON(http.StatusOK, DTO_Resp_TaskServiceLink{TaskID: uint(taskID), ServiceID: gateID})
 }
 
 // ApiUpdateDegrees обновляет градусы для гейта в задаче
@@ -513,7 +525,7 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid ids"))
 		return
 	}
-    var req DTO_Req_DegreesUpd
+	var req DTO_Req_DegreesUpd
 	if err := ctx.ShouldBindJSON(&req); err != nil || req.Degrees == nil {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("degrees required"))
 		return
@@ -522,5 +534,5 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-    ctx.JSON(http.StatusOK, DTO_Resp_UpdateDegrees{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
+	ctx.JSON(http.StatusOK, DTO_Resp_UpdateDegrees{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
 }

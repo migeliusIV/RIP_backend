@@ -1,12 +1,13 @@
 package config
 
 import (
-	"os"    
+	"os"
 	"strconv"
+	"time"
+
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"time"
 )
 
 type JWTConfig struct {
@@ -22,14 +23,20 @@ type RedisConfig struct {
 }
 
 type Config struct {
-	ServiceHost string
-	ServicePort int
-	JWT         JWTConfig
-	Redis       RedisConfig
+	ServiceHost       string
+	ServicePort       int
+	JWT               JWTConfig
+	Redis             RedisConfig
+	AsyncServiceUrl   string
+	InternalAuthToken string
 }
 
 func NewConfig() (*Config, error) {
 	var err error
+
+	// lw 8
+	asyncUrl := os.Getenv("ASYNC_SERVICE_URL")
+	internalToken := os.Getenv("INTERNAL_AUTH_TOKEN")
 
 	configName := "config"
 	_ = godotenv.Load()
@@ -81,5 +88,8 @@ func NewConfig() (*Config, error) {
 			Password: redisPassword,
 			User:     redisUser,
 		},
+
+		AsyncServiceUrl:   asyncUrl,
+		InternalAuthToken: internalToken,
 	}, nil
 }

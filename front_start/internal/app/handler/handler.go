@@ -1,19 +1,19 @@
 package handler
 
 import (
-    "front_start/internal/app/config"
-    appredis "front_start/internal/app/redis"
-    "front_start/internal/app/repository"
+	"front_start/internal/app/config"
+	appredis "front_start/internal/app/redis"
+	"front_start/internal/app/repository"
 
-    "github.com/gin-gonic/gin"
-    "github.com/sirupsen/logrus"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // Handler структура обработчиков API
 // @Description Основная структура содержащая зависимости обработчиков
 type Handler struct {
 	Repository *repository.Repository
-    Redis      *appredis.Client
+	Redis      *appredis.Client
 	JWTConfig  *config.JWTConfig
 }
 
@@ -40,9 +40,14 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	r.GET("/IBM", handler.GetGates)
 	r.GET("/gate_property/:id", handler.GetGateByID)
 
+	//internal := r.Group("/internal")
+	//{
+	//internal.PUT("/quantum_task/res", handler.SetQuantumTaskResult)
+	//}
+
 	// Эндпоинты, доступные только модераторам
-    moderator := r.Group("/")
-    moderator.Use(handler.AuthMiddleware, handler.ModeratorMiddleware)
+	moderator := r.Group("/")
+	moderator.Use(handler.AuthMiddleware, handler.ModeratorMiddleware)
 	{
 		// Gates (создание, изменение, удаление)
 		moderator.POST("/api/gates", handler.ApiAddGate)
@@ -53,25 +58,25 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		// QuantumTasks (завершение/отклонение)
 		moderator.PUT("/api/quantum_tasks/:id/resolve", handler.ApiResolveQTask)
 	}
-	
+
 	// Эндпоинты, доступные всем авторизованным пользователям
-    auth := r.Group("/")
-    auth.Use(handler.AuthMiddleware)
+	auth := r.Group("/")
+	auth.Use(handler.AuthMiddleware)
 	{
 		// API Users
 		auth.POST("/api/auth/logout", handler.Logout)
 		auth.GET("/api/users/me", handler.ApiMe)
 		auth.PUT("/api/users/me", handler.ApiUpdateMe)
-		
+
 		// Связи задачи-гейты (many-to-many)
 		auth.DELETE("/api/tasks/:task_id/services/:service_id", handler.ApiRemoveGateFromTask)
 		auth.PUT("/api/tasks/:task_id/services/:service_id", handler.ApiUpdateDegrees)
-		
+
 		// HTML
 		auth.GET("/quantum_task/:id", handler.GetTask)
 		auth.POST("/quantum_task/add/gate/:id_gate", handler.AddGateToTask)
 		auth.POST("/quantum_task/:task_id/delete", handler.DeleteTask)
-		
+
 		// API Gates
 		auth.POST("/api/draft/gates/:id", handler.ApiAddGateToDraft)
 

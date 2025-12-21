@@ -187,3 +187,13 @@ func (r *Repository) RemoveGateFromTask(taskID, gateID uint) error {
 func (r *Repository) UpdateDegrees(taskID, gateID uint, degrees float32) error {
 	return r.db.Model(&ds.DegreesToGates{}).Where("id_task = ? AND id_gate = ?", taskID, gateID).Update("degrees", degrees).Error
 }
+
+// UpdateQuantumTaskResult обновляет амплитуды в квантовой задаче после расчёта во внешнем сервисе
+func (r *Repository) UpdateQuantumTaskResult(taskID uint, k0, k1 float32) error {
+	return r.db.Model(&ds.QuantumTask{}).
+		Where("id_task = ?", taskID).
+		Updates(map[string]interface{}{
+			"res_koeff_0": k0,
+			"res_koeff_1": k1,
+		}).Error
+}
