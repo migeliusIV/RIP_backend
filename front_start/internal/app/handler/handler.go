@@ -88,6 +88,10 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		auth.PUT("/api/quantum_tasks/:id/form", handler.ApiFormQTask)
 		auth.DELETE("/api/quantum_tasks/:id", handler.ApiDeleteQTask)
 	}
+	internal := r.Group("/internal")
+	{
+		internal.PUT("/quantum_tasks/updating", handler.SetFraxResult)
+	}
 }
 
 // RegisterStatic регистрирует статические файлы и шаблоны

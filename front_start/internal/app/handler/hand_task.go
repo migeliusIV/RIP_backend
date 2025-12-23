@@ -210,6 +210,7 @@ func (h *Handler) ApiGetQTaskByID(ctx *gin.Context) {
 			Title:   gateInfo.Title, // или gateDegree.Gate.ID_gate, если нужно
 			TheAxis: gateInfo.TheAxis,
 			Image:   gateInfo.Image,
+			ID_gate: gateInfo.ID_gate,
 			ID_task: gateDegree.ID_task, // или gateDegree.Task.ID_task
 			Degrees: gateDegree.Degrees,
 		})
@@ -535,4 +536,29 @@ func (h *Handler) ApiUpdateDegrees(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, DTO_Resp_UpdateDegrees{TaskID: taskID, ServiceID: gateID, Degrees: req.Degrees})
+}
+
+// PUT /api/internal/frax/result
+func (h *Handler) SetFraxResult(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+	expectedToken := "secret12"
+
+	if token != expectedToken {
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid token"})
+		return
+	}
+
+	var res DTO_Res_TaskUpd
+	if err := c.ShouldBindJSON(&res); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	task, err := h.Repository.UpdateTask(uint(res.ID_task), res.TaskDescription)
+	if err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
 }

@@ -48,22 +48,6 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		// AllowOriginFunc: func(origin string) bool {
-		// 	// 🔑 КРИТИЧЕСКИ ВАЖНО
-		// 	if origin == "" || origin == "null" {
-		// 		return true
-		// 	}
-
-		// 	switch origin {
-		// 	case "http://localhost:5173":
-		// 	case "http://127.0.0.1:5173":
-		// 	case "https://migeliusiv.github.io":
-		// 	case "":
-		// 		return true
-		// 	}
-
-		// 	return false
-		// },
 		AllowAllOrigins: true,
 		AllowMethods: []string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS",

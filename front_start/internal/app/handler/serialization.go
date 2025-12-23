@@ -161,3 +161,9 @@ type DTO_Resp_TasksGatesInfo struct {
 	ID_task uint     `json:"id_task" example:"1"`
 	Degrees *float32 `json:"degrees" example:"90.0"`
 }
+
+// Async
+type DTO_Res_TaskUpd struct {
+	ID_task         uint   `json:"id_task" example:"1"`
+	TaskDescription string `gorm:"column:task_description" json:"task_description" example:"Quantum state calculation"`
+}

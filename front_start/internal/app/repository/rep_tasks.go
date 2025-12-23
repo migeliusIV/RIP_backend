@@ -90,7 +90,7 @@ func (r *Repository) ListTasks(status, from, to string) ([]*ds.QuantumTask, erro
 		q = q.Where("creation_date >= ?", from)
 	}
 	if to != "" {
-		q = q.Where("creation_date <= ?", to)
+		q = q.Where("creation_date <= ?", to+" 23:59:59.999999+00")
 	}
 	if err := q.Find(&tasks).Error; err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (r *Repository) ListTasksByUser(userID uint, status, from, to string) ([]*d
 		query = query.Where("creation_date >= ?", from)
 	}
 	if to != "" {
-		query = query.Where("creation_date <= ?", to)
+		query = query.Where("creation_date <= ?", to+" 23:59:59.999999+00")
 	}
 
 	err := query.Order("creation_date DESC").Find(&tasks).Error
